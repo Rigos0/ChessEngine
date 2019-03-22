@@ -14,6 +14,10 @@ while not stop:
 
    elif token == 'isready':
        print('readyok')
+         
+   elif token == 'ucinewgame':
+       from zd import new_game
+       new_game()
 
    elif token.startswith('go'):
        depth = 0
