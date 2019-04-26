@@ -3,9 +3,9 @@ class Board():
         self.squares = squares
         self.w_bishops = 
         self.w_rooks =
-        self.w_knights = 
-        self.w_king = 
-        self.w_queen = 
+        self.w_knights = [33, 28]
+        self.w_king = [31]
+        self.w_queen = [30]
         
         self.w_occupation = {
             27: True,
