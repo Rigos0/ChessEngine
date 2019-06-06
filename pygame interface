@@ -1,0 +1,159 @@
+import pygame
+import time
+
+pygame.init()
+
+def get_square(x,y):
+    ranks = ["1","2","3","4","5","6","7","8"]
+    files = ["a","b""c","d","e","f","g","h",]
+    
+    counter = 0
+    counter2 = 0
+    for i in range(8):
+        if counter < y < counter + 50:
+            rank = ranks[counter2]
+            break
+        else: 
+            counter += 50
+            counter2 += 1
+    for i in range(8):
+        if 50 + counter < x < counter + 100:
+            file = files[counter2]
+            break
+        else: 
+            counter += 50
+            counter2 += 1
+    print("the square is: ",file+rank)
+        
+
+
+    
+    
+
+
+white = (255,255,255)
+black = (0,0,0)
+
+red = (255,0,0)
+green = (0,255,0)
+blue = (0,0,255)
+brown = (139,115,85)
+skin = (201,201,201)
+
+screen = pygame.display.set_mode((800,600))
+
+#surface = Surface((500, 300))
+
+#change its background color
+
+
+#blit myNewSurface onto the main screen at the position (0, 0)
+#screen.blit(surface, (0, 0))
+
+knight = pygame.image.load("chessknight.png")
+knight = pygame.transform.scale(knight, (50, 50))
+
+
+
+def board():
+    size = 49
+    x = 200
+    y = 150
+    for s in range(4):
+        for i in range(4):
+            pygame.draw.rect(screen, brown, (x,y,size,size))
+            x += 50
+            pygame.draw.rect(screen, skin, (x,y,size,size))
+            x += 50
+        x = 200
+        y += 100
+
+    x = 200
+    y = 100
+    for v in range(4):
+       for i in range(4):
+            pygame.draw.rect(screen, skin, (x,y,size,size))
+            x += 50
+            pygame.draw.rect(screen, brown, (x,y,size,size))
+            x += 50
+       x = 200
+       y += 100
+  
+       
+def blit_knight():
+    #myimage.scale(screen, (50, 50), DestSurface = None)
+    #imagerect = myimage.get_rect()
+    screen.blit(knight, (x-25,y-25))
+
+def s_square():
+       if (550 > x > 500) and (450 < y < 500):
+        sel_square = "e2"
+        return sel_square
+
+def n_square():
+       if (500 > x > 450) and (350 < y < 400):
+        next_square = "f3"
+        return next_square
+       
+
+x=523
+y=474
+image = False
+
+from InterBoard import main
+
+while True:
+    screen.fill((55,155,255))
+    board()
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            quit()
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            x, y = pygame.mouse.get_pos()
+            get_square(x,y)
+            #image = True
+            #main()
+
+           # if (550 > s > 500) and (400 < r < 450):
+                #bus = "g2"
+                #main()
+          #  else: 
+           #     pass
+            
+        
+        #if event.type == pygame.MOUSEBUTTONUP:
+         #   image = False
+         #   m, v = pygame.mouse.get_pos()
+         #   if (500 > m > 450) and (350 < v < 400):
+         #       x = 473
+         #       y = 374
+         #   elif (600 > m > 550) and (350 < v < 400):
+         #       x = 573
+         #       y = 374
+         #   elif (450 > m > 400) and (400 < v < 450):
+         #       x = 423
+         #       y = 423
+                
+         #   else: 
+         #       x=523
+         #       y=474
+
+            
+            #if clicked == 1:
+             #   clicked = 0
+                #next_square = "f3"
+                #bus = sel_square + "-" + next_square
+                #from Board import main
+                #main()
+            
+    blit_knight()
+    if image:
+        x, y = pygame.mouse.get_pos()
+
+    
+
+ 
+    
+   
+    pygame.display.update()
