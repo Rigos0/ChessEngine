@@ -1,3 +1,4 @@
+
 class Board():
     def __init__(self):
         Board.w_bishops = [29, 32]
@@ -255,24 +256,21 @@ class Board():
 class Move(Board):
     def __init__(self):
         Board.__init__(self)
+        Move.dots = []
 
     def w_get_squares(self):
-        global dots
-        dots = []
         from interface import selected_square
-        #print("insert a square: ")
+        Move.dots = []
         inserted = selected_square
         w_lists = [Board.w_knights_moves, Board.w_pawns_moves, Board.w_queen_moves, Board.w_bishops_moves,
-                   Board.w_rooks_moves]
-        print(w_lists)
+                   Board.w_rooks_moves, Board.w_king_moves]
         for x in w_lists:
             for i in x:
                 try:
                     curr_square = i[0] + i[1]
                     if curr_square == inserted:
                         next_square = i[3] + i[4]
-                        print(next_square)
-                        dots.append(next_square)
+                        Move.dots.append(next_square)
 
                 except IndexError:
                     pass
@@ -290,12 +288,12 @@ class Move(Board):
                     curr_square = i[0] + i[1]
                     if curr_square == inserted:
                         next_square = i[3] + i[4]
-                        print(next_square)
                 except IndexError:
                     pass
 
     def w_make_move(self):
-        inserted = input("insert a move: ")
+        from interface import square_to_go
+        inserted = square_to_go
         sel_piece = inserted[0] + inserted[1]
         key_list = list(Board.squares.keys())
         val_list = list(Board.squares.values())
@@ -312,18 +310,22 @@ class Move(Board):
             Board.w_occupation[new_pos] = True
 
         if inserted in Board.w_rooks_moves:
-            piece_position = Board.w_rooks.index(piece)
-            sel_square = inserted[3] + inserted[4]
-            new_pos = (key_list[val_list.index(sel_square)])
-            Board.w_occupation[piece] = False
-            Board.w_rooks[piece_position] = new_pos
-            Board.w_occupation[new_pos] = True
+            try:
+                piece_position = Board.w_rooks.index(piece)
+                sel_square = inserted[3] + inserted[4]
+                new_pos = (key_list[val_list.index(sel_square)])
+                Board.w_occupation[piece] = False
+                Board.w_rooks[piece_position] = new_pos
+                Board.w_occupation[new_pos] = True
+            except ValueError:
+                pass
 
         if inserted in Board.w_knights_moves:
             Board.w_occupation[piece] = False
             piece_position = Board.w_knights.index(piece)
             Board.w_knights[piece_position] = new_pos
             Board.w_occupation[new_pos] = True
+            Board.w_knights_moves = []
 
         if inserted in Board.w_king_moves:
             piece_position = Board.w_king.index(piece)
@@ -475,6 +477,8 @@ class Move(Board):
     def clean_piece_moves(self):
         Board.w_pawns_moves = []
         Board.w_queen_moves = []
+        Board.w_rooks_moves = []
+        Board.b_rooks_moves = []
         Board.w_knights_moves = []
         Board.w_bishops_moves = []
         Board.b_pawns_moves = []
@@ -554,6 +558,7 @@ class WhiteKing(Board):
 
     def king_move(self):
         moves = [12, -12, 13, -13, 11, -11, 1, -1]
+
         for i in range(8):
             self.move = Board.w_king[Board.piece] + moves[i]
             w_occup = Board.w_occupation.get(self.move)
@@ -564,8 +569,10 @@ class WhiteKing(Board):
                 if convert:
                     converted_move = (Board.squares.get(Board.w_king[Board.piece])) + "-" + convert
                     Board.w_king_moves.append(converted_move)
+                    self.move = int
             b_occup = Board.b_occupation.get(self.move)
             if b_occup:
+                converted_move = (Board.squares.get(Board.w_king[Board.piece])) + "-" + convert
                 Board.w_taking.append(converted_move)
 
 
@@ -988,11 +995,16 @@ def main():
                                     w_pawn.double_move()
 
 
+    move.w_get_squares()  # aoeirgn[aoenao[dfngo[
 
-    move.w_get_squares()  # aoeirgn[aoenao[dfngo[e
-    #move.w_make_move()
 
+
+
+
+def main_w_move():
+    move.w_make_move()
     move.clean_piece_moves()
+
 
     #
     # move.b_take()
@@ -1062,5 +1074,3 @@ def main():
     # move.b_get_squares()
     # move.b_make_move()
     # move.clean_piece_moves()
-
-
