@@ -1,6 +1,5 @@
-
 import pygame
-import time
+from Board import *
 
 pygame.init()
 
@@ -23,10 +22,9 @@ screen = pygame.display.set_mode((800, 600))
 # screen.blit(surface, (0, 0))
 
 
-
 def get_square(x, y):
     ranks = ["1", "2", "3", "4", "5", "6", "7", "8"]
-    files = ["a", "b", "c", "d", "e", "f", "g", "h" ]
+    files = ["a", "b", "c", "d", "e", "f", "g", "h"]
 
     counter = 100
     counter2 = -1
@@ -41,21 +39,21 @@ def get_square(x, y):
     counter2 = 0
     counter = 200
     for i in range(8):
-        if  counter < x < counter + 50:
+        if counter < x < counter + 50:
             file = files[counter2]
             break
         else:
             counter += 50
             counter2 += 1
     try:
-        selected_square =  file + rank
+        selected_square = file + rank
         return selected_square
     except UnboundLocalError:
         pass
 
 
 def square_to_pos(square):
-    ranks = ["8","7","6","5","4","3","2","1"]
+    ranks = ["8", "7", "6", "5", "4", "3", "2", "1"]
     files = ["a", "b", "c", "d", "e", "f", "g", "h"]
 
     x_index = files.index(square[0])
@@ -64,11 +62,6 @@ def square_to_pos(square):
     y_pos = 125 + y_index * 50
     pos = (x_pos, y_pos)
     return pos
-
-
-
-knight = pygame.image.load("chessknight.png")
-knight = pygame.transform.scale(knight, (50, 50))
 
 
 def board():
@@ -95,51 +88,114 @@ def board():
         x = 200
         y += 100
 
-def blit_dots():
-    from board import dots
-    print(dots)
-    for square in dots:
-        pos = square_to_pos(square)
-        pygame.draw.rect(screen, (235,99,31), [pos[0] - 25,pos[1]-25, 48, 48], 5)
-        #pygame.draw.circle(screen, red, pos, 7)
 
+
+
+def blit_dots():
+    for square in Move.dots:
+        pos = square_to_pos(square)
+        pygame.draw.rect(screen, (235, 99, 31), [pos[0] - 25, pos[1]-25, 48, 48], 5)
+        # pygame.draw.circle(screen, red, pos, 7)
+
+
+knight = pygame.image.load("chessknight.png")
+knight = pygame.transform.scale(knight, (50, 50))
+pawn = pygame.image.load("whitepawn.png")
+pawn = pygame.transform.scale(pawn, (45, 45))
+bishop = pygame.image.load("whitebishop.png")
+bishop = pygame.transform.scale(bishop, (40, 40))
+rook = pygame.image.load("whiterook.png")
+rook = pygame.transform.scale(rook, (44, 44))
+queen = pygame.image.load("whitequeen.png")
+queen = pygame.transform.scale(queen, (50, 50))
+king = pygame.image.load("whiteking.png")
+king = pygame.transform.scale(king, (51, 51))
 
 
 def blit_knight():
-    # myimage.scale(screen, (50, 50), DestSurface = None)
-    # imagerect = myimage.get_rect()
-    screen.blit(knight, (x - 25, y - 25))
+    for i in Board.w_knights:
+        square = Board.squares.get(i)
+        pos = square_to_pos(square)
+        pos = (pos[0] - 26, pos[1] -25)
+        screen.blit(knight, pos)
 
 
-x = 523
-y = 474
-image = False
+def blit_pawn():
+    for i in Board.w_pawns:
+        square = Board.squares.get(i)
+        pos = square_to_pos(square)
+        pos = (pos[0] - 24, pos[1] - 23)
+        screen.blit(pawn, pos)
 
-from board import main
+
+def blit_bishop():
+    for i in Board.w_bishops:
+        square = Board.squares.get(i)
+        pos = square_to_pos(square)
+        pos = (pos[0] - 20, pos[1] - 20)
+        screen.blit(bishop, pos)
+
+
+def blit_queen():
+    for i in Board.w_queen:
+        square = Board.squares.get(i)
+        pos = square_to_pos(square)
+        pos = (pos[0] - 25, pos[1] - 25)
+        screen.blit(queen, pos)
+
+
+def blit_rook():
+    for i in Board.w_rooks:
+        square = Board.squares.get(i)
+        pos = square_to_pos(square)
+        pos = (pos[0] - 23, pos[1] - 22)
+        screen.blit(rook, pos)
+
+
+def blit_king():
+    for i in Board.w_king:
+        square = Board.squares.get(i)
+        pos = square_to_pos(square)
+        pos = (pos[0] - 26, pos[1] - 27)
+        screen.blit(king, pos)
+
+
+blitdots = False
+selected_square = ("", "")
+dots = []
+previous_selected_square = []
+counter = 0
+
 
 while True:
     screen.fill((55, 155, 255))
-    board() #this is just to draw a board
+    board()  # this is just to draw a board
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             quit()
         if event.type == pygame.MOUSEBUTTONDOWN:
             x, y = pygame.mouse.get_pos()
-            selected_square = get_square(x,y)
-            image = True
-            main()
+            selected_square = get_square(x, y)
+            previous_selected_square.append(selected_square)
+            counter += 1
+            for i in Move.dots:
+                if i == selected_square:
+                    square_to_go = previous_selected_square[counter - 2] + "-" + i
+                    main_w_move()
+            blitdots = True
+
+        main()
+        blit_pawn()
+        blit_bishop()
+        blit_knight()
+        blit_rook()
+        blit_queen()
+        blit_king()
+        if blitdots:
             blit_dots()
 
-        blit_knight()
-
-
-        if image:
-            x, y = pygame.mouse.get_pos()
-
         pygame.display.update()
-
-
 
 
             #if (550 > s > 500) and (400 < r < 450):
@@ -173,5 +229,3 @@ while True:
             # bus = sel_square + "-" + next_square
             # from Board import main
             # main()
-
-
