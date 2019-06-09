@@ -257,13 +257,14 @@ class Move(Board):
     def __init__(self):
         Board.__init__(self)
         Move.dots = []
+        Move.b_dots = []
 
     def w_get_squares(self):
         from interface import selected_square
         Move.dots = []
         inserted = selected_square
         w_lists = [Board.w_knights_moves, Board.w_pawns_moves, Board.w_queen_moves, Board.w_bishops_moves,
-                   Board.w_rooks_moves, Board.w_king_moves]
+                   Board.w_rooks_moves, Board.w_king_moves, Board.w_taking]
         for x in w_lists:
             for i in x:
                 try:
@@ -275,19 +276,20 @@ class Move(Board):
                 except IndexError:
                     pass
 
-    def b_get_squares(self):
-        from interface import selected_square
-        # print("insert a square: ")
-        inserted = selected_square
-
+    def b_get_squares(self, b_selected_square):
+        Move.b_dots = []
+        inserted = b_selected_square
+        print(inserted)
         b_lists = [Board.b_knights_moves, Board.b_pawns_moves, Board.b_queen_moves, Board.b_bishops_moves,
-                   Board.b_rooks_moves]
+                   Board.b_rooks_moves, Board.b_king_moves]
         for x in b_lists:
             for i in x:
                 try:
                     curr_square = i[0] + i[1]
                     if curr_square == inserted:
                         next_square = i[3] + i[4]
+                        Move.b_dots.append(next_square)
+
                 except IndexError:
                     pass
 
@@ -368,10 +370,9 @@ class Move(Board):
                     x[piece_position] = new_pos
                     Board.w_occupation[new_pos] = True
 
-    def b_make_move(self):
-        inserted = input("insert a move: ")
-       # from interface import bus
-        #inserted = str(bus)
+    def b_make_move(self, b_square_to_go):
+        inserted = b_square_to_go
+        print(inserted)
         sel_piece = inserted[0] + inserted[1]
         key_list = list(Board.squares.keys())
         val_list = list(Board.squares.values())
@@ -995,7 +996,7 @@ def main():
                                     w_pawn.double_move()
 
 
-    move.w_get_squares()  # aoeirgn[aoenao[dfngo[
+    move.w_get_squares()
 
 
 
@@ -1006,71 +1007,73 @@ def main_w_move():
     move.clean_piece_moves()
 
 
-    #
-    # move.b_take()
-    #
-    # piece_count = len(Board.b_rooks)
-    # if piece_count >= 1:
-    #     b_rook.piece1()
-    #     b_rook.rook_move()
-    #     if piece_count >= 2:
-    #         b_rook.piece2()
-    #         b_rook.rook_move()
-    #
-    # piece_count = len(Board.b_knights)
-    # if piece_count >= 1:
-    #     b_knight.piece1()
-    #     b_knight.b_knight_move()
-    #     if piece_count >= 2:
-    #         b_knight.piece2()
-    #         b_knight.b_knight_move()
-    #
-    # piece_count = len(Board.b_bishops)
-    # if piece_count >= 1:
-    #     b_bishop.piece1()
-    #     b_bishop.bishop_move()
-    #     if piece_count >= 2:
-    #         b_bishop.piece2()
-    #         b_bishop.bishop_move()
-    #
-    # b_queen.piece1()
-    # b_queen.bishop_move()
-    # b_queen.rook_move()
-    #
-    # piece_count = len(Board.b_pawns)
-    # if piece_count >= 1:
-    #     b_pawn.piece1()
-    #     b_pawn.pawn_move()
-    #     b_pawn.double_move()
-    #     if piece_count >= 2:
-    #         b_pawn.piece2()
-    #         b_pawn.pawn_move()
-    #         b_pawn.double_move()
-    #         if piece_count >= 3:
-    #             b_pawn.piece3()
-    #             b_pawn.pawn_move()
-    #             b_pawn.double_move()
-    #             if piece_count >= 4:
-    #                 b_pawn.piece4()
-    #                 b_pawn.pawn_move()
-    #                 b_pawn.double_move()
-    #                 if piece_count >= 5:
-    #                     b_pawn.piece5()
-    #                     b_pawn.pawn_move()
-    #                     b_pawn.double_move()
-    #                     if piece_count >= 6:
-    #                         b_pawn.piece6()
-    #                         b_pawn.pawn_move()
-    #                         b_pawn.double_move()
-    #                         if piece_count >= 7:
-    #                             b_pawn.piece7()
-    #                             b_pawn.pawn_move()
-    #                             b_pawn.double_move()
-    #                             if piece_count >= 8:
-    #                                 b_pawn.piece8()
-    #                                 b_pawn.pawn_move()
-    #                                 b_pawn.double_move()
-    #
-    # move.b_get_squares()
-    # move.b_make_move()
-    # move.clean_piece_moves()
+def b_main(b_selected_square):
+    move.b_take()
+
+    piece_count = len(Board.b_rooks)
+    if piece_count >= 1:
+        b_rook.piece1()
+        b_rook.rook_move()
+        if piece_count >= 2:
+            b_rook.piece2()
+            b_rook.rook_move()
+
+    piece_count = len(Board.b_knights)
+    if piece_count >= 1:
+        b_knight.piece1()
+        b_knight.b_knight_move()
+        if piece_count >= 2:
+            b_knight.piece2()
+            b_knight.b_knight_move()
+
+    piece_count = len(Board.b_bishops)
+    if piece_count >= 1:
+        b_bishop.piece1()
+        b_bishop.bishop_move()
+        if piece_count >= 2:
+            b_bishop.piece2()
+            b_bishop.bishop_move()
+
+    b_queen.piece1()
+    b_queen.bishop_move()
+    b_queen.rook_move()
+
+    piece_count = len(Board.b_pawns)
+    if piece_count >= 1:
+        b_pawn.piece1()
+        b_pawn.pawn_move()
+        b_pawn.double_move()
+        if piece_count >= 2:
+            b_pawn.piece2()
+            b_pawn.pawn_move()
+            b_pawn.double_move()
+            if piece_count >= 3:
+                b_pawn.piece3()
+                b_pawn.pawn_move()
+                b_pawn.double_move()
+                if piece_count >= 4:
+                    b_pawn.piece4()
+                    b_pawn.pawn_move()
+                    b_pawn.double_move()
+                    if piece_count >= 5:
+                        b_pawn.piece5()
+                        b_pawn.pawn_move()
+                        b_pawn.double_move()
+                        if piece_count >= 6:
+                            b_pawn.piece6()
+                            b_pawn.pawn_move()
+                            b_pawn.double_move()
+                            if piece_count >= 7:
+                                b_pawn.piece7()
+                                b_pawn.pawn_move()
+                                b_pawn.double_move()
+                                if piece_count >= 8:
+                                    b_pawn.piece8()
+                                    b_pawn.pawn_move()
+                                    b_pawn.double_move()
+    move.b_get_squares(b_selected_square)
+
+
+def main_b_move(b_square_to_go):
+    move.b_make_move(b_square_to_go)
+    move.clean_piece_moves()
