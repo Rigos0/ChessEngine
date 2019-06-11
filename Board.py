@@ -1,4 +1,3 @@
-
 class Board():
     def __init__(self):
         Board.w_bishops = [29, 32]
@@ -259,12 +258,12 @@ class Move(Board):
         Move.dots = []
         Move.b_dots = []
 
-    def w_get_squares(self):
-        from interface import selected_square
+    def w_get_squares(self, selected_square):
         Move.dots = []
         inserted = selected_square
         w_lists = [Board.w_knights_moves, Board.w_pawns_moves, Board.w_queen_moves, Board.w_bishops_moves,
                    Board.w_rooks_moves, Board.w_king_moves, Board.w_taking]
+
         for x in w_lists:
             for i in x:
                 try:
@@ -279,7 +278,6 @@ class Move(Board):
     def b_get_squares(self, b_selected_square):
         Move.b_dots = []
         inserted = b_selected_square
-        print(inserted)
         b_lists = [Board.b_knights_moves, Board.b_pawns_moves, Board.b_queen_moves, Board.b_bishops_moves,
                    Board.b_rooks_moves, Board.b_king_moves]
         for x in b_lists:
@@ -293,8 +291,7 @@ class Move(Board):
                 except IndexError:
                     pass
 
-    def w_make_move(self):
-        from interface import square_to_go
+    def w_make_move(self, square_to_go):
         inserted = square_to_go
         sel_piece = inserted[0] + inserted[1]
         key_list = list(Board.squares.keys())
@@ -372,7 +369,6 @@ class Move(Board):
 
     def b_make_move(self, b_square_to_go):
         inserted = b_square_to_go
-        print(inserted)
         sel_piece = inserted[0] + inserted[1]
         key_list = list(Board.squares.keys())
         val_list = list(Board.squares.values())
@@ -490,6 +486,36 @@ class Move(Board):
         Board.w_king_moves = []
         Board.b_king_moves = []
         Board.b_bishops_moves = []
+
+    def delete_duplicates(self):
+        Board.w_pawns_moves = set(Board.w_pawns_moves)
+        Board.w_pawns_moves = list(Board.w_pawns_moves)
+        Board.w_queen_moves = set(Board.w_queen_moves)
+        Board.w_queen_moves = list(Board.w_queen_moves)
+        Board.w_rooks_moves = set(Board.w_rooks_moves)
+        Board.w_rooks_moves = list(Board.w_rooks_moves)
+        Board.b_rooks_moves = set(Board.b_rooks_moves)
+        Board.b_rooks_moves = list(Board.b_rooks_moves)
+        Board.w_knights_moves = set(Board.w_knights_moves)
+        Board.w_knights_moves = list(Board.w_knights_moves)
+        Board.w_bishops_moves = set(Board.w_bishops_moves)
+        Board.w_bishops_moves = list(Board.w_bishops_moves)
+        Board.b_bishops_moves = set(Board.b_bishops_moves)
+        Board.b_bishops_moves = list(Board.b_bishops_moves)
+        Board.b_pawns_moves = set(Board.b_pawns_moves)
+        Board.b_pawns_moves = list(Board.b_pawns_moves)
+        Board.b_knights_moves = set(Board.b_knights_moves)
+        Board.b_knights_moves = list(Board.b_knights_moves)
+        Board.b_queen_moves = set(Board.b_queen_moves)
+        Board.b_queen_moves = list(Board.b_queen_moves)
+        Board.w_king_moves = set(Board.w_king_moves)
+        Board.w_king_moves = list(Board.w_king_moves)
+        Board.b_king_moves = set(Board.b_king_moves)
+        Board.b_king_moves = list(Board.b_king_moves)
+        Board.w_taking = set(Board.w_taking)
+        Board.w_taking = list(Board.w_taking)
+        Board.b_taking = set(Board.b_taking)
+        Board.b_taking = list(Board.b_taking)
 
     def w_take(self):
         w_lists = [Board.w_knights, Board.w_pawns, Board.w_queen, Board.w_bishops, Board.w_rooks]
@@ -927,7 +953,7 @@ b_king = BlackKing()
 move = Move()
 
 
-def main():
+def w_main():
     move.w_take()
 
     piece_count = len(Board.w_rooks)
@@ -995,15 +1021,14 @@ def main():
                                     w_pawn.pawn_move()
                                     w_pawn.double_move()
 
-
-    move.w_get_squares()
-
+    move.delete_duplicates()
 
 
+def get_squares(selected_square):
+    move.w_get_squares(selected_square)
 
-
-def main_w_move():
-    move.w_make_move()
+def main_w_move(square_to_go):
+    move.w_make_move(square_to_go)
     move.clean_piece_moves()
 
 
