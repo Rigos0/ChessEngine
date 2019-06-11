@@ -15,17 +15,6 @@ brown = (139, 115, 85)
 skin = (201, 201, 201)
 
 
-user32 = ctypes.WinDLL('user32')
-
-SW_MAXIMISE = 3
-
-hWnd = user32.GetForegroundWindow()
-user32.ShowWindow(hWnd, SW_MAXIMISE)
-
-screensize = pygame.display.Info()
-surface = pygame.display.set_mode((screensize.current_h,screensize.current_w),pygame.RESIZABLE)
-
-
 
 # surface = Surface((500, 300))
 
@@ -222,96 +211,42 @@ def blit_b_knight():
         surface.blit(blackknight, pos)
 
 
-blitdots = False
-selected_square = ("", "")
-dots = []
-previous_selected_square = []
-counter = 0
-b_previous_selected_square = []
-
-def black_to_move(surface):
-    b_selected_square = str
-    b_square_to_go = str
-    i = "a9"
-
+def WhiteMove(surface):
+    blitdots = False
+    global selected_square
+    selected_square = str
+    previous_selected_square = []
     counter = 0
-    Move.b_dots = []
-    b_blitdots = False
+    white_move = True
 
-    global blackmove
-
-    while blackmove:
-        print("black")
-
+    while white_move:
         surface.fill((0, 0, 0))
         chessboard()  # this is just to draw a board
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
+
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = pygame.mouse.get_pos()
-                b_selected_square = get_square(x, y)
-                b_previous_selected_square.append(b_selected_square)
+                selected_square = get_square(x, y)
+                previous_selected_square.append(selected_square)
                 counter += 1
-                for i in Move.b_dots:
-                    if i == b_selected_square:
-                        b_square_to_go = b_previous_selected_square[counter - 2] + "-" + i
-                        main_b_move(b_square_to_go)
-                        blackmove = False
-                        Move.dots = []
 
-                b_blitdots = True
+                for i in Move.dots:
+                    if i == selected_square:
+                        global square_to_go
+                        square_to_go = previous_selected_square[counter - 2] + "-" + i
+                        main_w_move(square_to_go)
+                        white_move = False
+
+                blitdots = True
+
             if event.type == pygame.VIDEORESIZE:
                 surface = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
 
-            b_main(b_selected_square)
-            blit_pawn()
-            blit_bishop()
-            blit_knight()
-            blit_rook()
-            blit_queen()
-            blit_king()
-            blit_b_knight()
-            blit_b_pawn()
-            blit_b_bishop()
-            blit_b_rook()
-            blit_b_queen()
-            blit_b_king()
-
-
-            if b_blitdots:
-                blit_b_dots()
-            pygame.display.update()
-
-global blackmove
-blackmove = True
-
-while True:
-    print("white")
-    surface.fill((0, 0, 0))
-    chessboard()  # this is just to draw a board
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            quit()
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            x, y = pygame.mouse.get_pos()
-            selected_square = get_square(x, y)
-            previous_selected_square.append(selected_square)
-            counter += 1
-            for i in Move.dots:
-                if i == selected_square:
-                    square_to_go = previous_selected_square[counter - 2] + "-" + i
-                    blackmove = True
-                    main_w_move()
-                    black_to_move(surface)
-
-            blitdots = True
-        if event.type == pygame.VIDEORESIZE:
-            surface = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
-
         w_main()
+        get_squares(selected_square)
         blit_pawn()
         blit_bishop()
         blit_knight()
@@ -328,4 +263,64 @@ while True:
         if blitdots:
             blit_dots()
         pygame.display.update()
+
+
+
+def BlackMove(surface):
+    blitdots = False
+    global selected_square
+    selected_square = str
+    previous_selected_square = []
+    counter = 0
+    black_move = True
+
+    while white_move:
+        surface.fill((0, 0, 0))
+        chessboard()  # this is just to draw a board
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                x, y = pygame.mouse.get_pos()
+                selected_square = get_square(x, y)
+                previous_selected_square.append(selected_square)
+                counter += 1
+
+                for i in Move.dots:
+                    if i == selected_square:
+                        global square_to_go
+                        square_to_go = previous_selected_square[counter - 2] + "-" + i
+                        main_b_move(square_to_go)
+                        black_move = False
+
+                blitdots = True
+
+            if event.type == pygame.VIDEORESIZE:
+                surface = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
+
+        w_main()
+        get_squares(selected_square)
+        blit_pawn()
+        blit_bishop()
+        blit_knight()
+        blit_rook()
+        blit_queen()
+        blit_king()
+        blit_b_knight()
+        blit_b_pawn()
+        blit_b_bishop()
+        blit_b_rook()
+        blit_b_queen()
+        blit_b_king()
+
+        if blitdots:
+            blit_dots()
+        pygame.display.update()
+
+screensize = pygame.display.Info()
+surface = pygame.display.set_mode((screensize.current_h,screensize.current_w),pygame.RESIZABLE)
+WhiteMove(surface)
+BlackMove(surface)
 
