@@ -615,7 +615,7 @@ class BlackKing(Board):
             w_occup = Board.w_occupation.get(self.move)
             if w_occup:
                 converted_move = (Board.squares.get(Board.b_king[Board.piece])) + "-" + convert
-                if converted_move not in Board.b_taking_moves:
+                if converted_move not in Board.b_taking:
                     Board.b_taking.append(converted_move)
 
 
