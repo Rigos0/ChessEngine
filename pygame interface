@@ -16,12 +16,6 @@ skin = (201, 201, 201)
 
 
 
-# surface = Surface((500, 300))
-
-# change its background color
-
-# blit myNewSurface onto the main surface at the position (0, 0)
-# surface.blit(surface, (0, 0))
 
 
 def get_square(x, y):
@@ -66,14 +60,12 @@ def square_to_pos(square):
     return pos
 
 
-chess_board = pygame.image.load("chessboard.png")
+chess_board = pygame.image.load("chessboard.jpg")
 chess_board = pygame.transform.scale(chess_board, (640, 640))
 
 
 def chessboard():
     surface.blit(chess_board, (100, 120))
-
-
 
 
 def blit_dots():
@@ -246,7 +238,7 @@ def WhiteMove(surface):
                 surface = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
 
         w_main()
-        get_squares(selected_square)
+        w_get_squares(selected_square)
         blit_pawn()
         blit_bishop()
         blit_knight()
@@ -274,13 +266,15 @@ def BlackMove(surface):
     counter = 0
     black_move = True
 
-    while white_move:
+    while black_move:
         surface.fill((0, 0, 0))
         chessboard()  # this is just to draw a board
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
+            if event.type == pygame.VIDEORESIZE:
+                surface = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = pygame.mouse.get_pos()
@@ -297,11 +291,10 @@ def BlackMove(surface):
 
                 blitdots = True
 
-            if event.type == pygame.VIDEORESIZE:
-                surface = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
 
-        w_main()
-        get_squares(selected_square)
+
+        b_main()
+        b_get_squares(selected_square)
         blit_pawn()
         blit_bishop()
         blit_knight()
@@ -320,7 +313,13 @@ def BlackMove(surface):
         pygame.display.update()
 
 screensize = pygame.display.Info()
-surface = pygame.display.set_mode((screensize.current_h,screensize.current_w),pygame.RESIZABLE)
-WhiteMove(surface)
-BlackMove(surface)
+surface = pygame.display.set_mode((screensize.current_h, screensize.current_w), pygame.RESIZABLE)
+user32 = ctypes.WinDLL('user32')
 
+SW_MAXIMISE = 3
+
+hWnd = user32.GetForegroundWindow()
+user32.ShowWindow(hWnd, SW_MAXIMISE)
+while True:
+    WhiteMove(surface)
+    BlackMove(surface)
