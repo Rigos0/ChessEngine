@@ -1,5 +1,7 @@
 import random
-class Board():
+
+
+class Board:
     def __init__(self):
         Board.w_bishops = [29, 32]
         Board.w_rooks = [27, 34]
@@ -27,9 +29,10 @@ class Board():
         Board.b_queen_moves = []
         Board.b_pawns_moves = []
         Board.b_taking = []
-        Board.piece = 0
         Board.w_occupation = {}
         Board.b_occupation = {}
+        Board.w_attacks = []
+        Board.b_attacks = []
 
         Board.squares = {
             27: "a1",
@@ -98,30 +101,6 @@ class Board():
             118: "h8"
         }
 
-    def piece1(self):
-        Board.piece = 0
-
-    def piece2(self):
-        Board.piece = 1
-
-    def piece3(self):
-        Board.piece = 2
-
-    def piece4(self):
-        Board.piece = 3
-
-    def piece5(self):
-        Board.piece = 4
-
-    def piece6(self):
-        Board.piece = 5
-
-    def piece7(self):
-        Board.piece = 6
-
-    def piece8(self):
-        Board.piece = 7
-
     def WhiteOccupation(self):
         white_pieces = Board.w_pawns + Board.w_bishops + Board.w_knights + Board.w_rooks + Board.w_king + Board.w_queen
         square_counter = 27
@@ -133,10 +112,10 @@ class Board():
             square_counter += 1
 
     def BlackOccupation(self):
-        white_pieces = Board.b_pawns + Board.b_bishops + Board.b_knights + Board.b_rooks + Board.b_king + Board.b_queen
+        black_pieces = Board.b_pawns + Board.b_bishops + Board.b_knights + Board.b_rooks + Board.b_king + Board.b_queen
         square_counter = 27
         while square_counter < 119:
-            if square_counter in white_pieces:
+            if square_counter in black_pieces:
                 Board.b_occupation[square_counter] = True
             else:
                 Board.b_occupation[square_counter] = False
@@ -204,9 +183,7 @@ class Move(Board):
 
             Board.w_rooks[piece_position] = new_pos
 
-
         if move in Board.w_knights_moves:
-
             piece_position = Board.w_knights.index(piece)
             Board.w_knights[piece_position] = new_pos
             Board.w_knights_moves = []
@@ -310,38 +287,6 @@ class Move(Board):
                     x[piece_position] = new_pos
 
 
-    def print_w_moves(self):
-        for i in range(len(Board.w_pawns_moves)):
-            print(Board.w_pawns_moves[i])
-        for i in range(len(Board.w_knights_moves)):
-            print(Board.w_knights_moves[i])
-        for i in range(len(Board.w_taking)):
-            print(Board.w_taking[i])
-        for i in range(len(Board.w_king_moves)):
-            print(Board.w_king_moves[i])
-        for i in range(len(Board.w_rooks_moves)):
-            print(Board.w_rooks_moves[i])
-        for i in range(len(Board.w_bishops_moves)):
-            print(Board.w_bishops_moves[i])
-        for i in range(len(Board.w_queen_moves)):
-            print(Board.w_queen_moves[i])
-
-    def print_b_moves(self):
-        for i in range(len(Board.b_pawns_moves)):
-            print(Board.b_pawns_moves[i])
-        for i in range(len(Board.b_knights_moves)):
-            print(Board.b_knights_moves[i])
-        for i in range(len(Board.b_taking)):
-            print(Board.b_taking[i])
-        for i in range(len(Board.b_king_moves)):
-            print(Board.b_king_moves[i])
-        for i in range(len(Board.b_rooks_moves)):
-            print(Board.b_rooks_moves[i])
-        for i in range(len(Board.b_bishops_moves)):
-            print(Board.b_bishops_moves[i])
-        for i in range(len(Board.b_queen_moves)):
-            print(Board.b_queen_moves[i])
-
     def clean_piece_moves(self):
         Board.w_pawns_moves = []
         Board.w_queen_moves = []
@@ -357,7 +302,6 @@ class Move(Board):
         Board.w_king_moves = []
         Board.b_king_moves = []
         Board.b_bishops_moves = []
-
 
     def w_take(self):
         w_lists = [Board.w_knights, Board.w_pawns, Board.w_queen, Board.w_bishops, Board.w_rooks, Board.w_king]
@@ -395,6 +339,8 @@ class WhiteKnight(Board):
                             position)) + "-" + normal_notation_next_square
                         if converted_move not in Board.w_knights_moves:
                             Board.w_knights_moves.append(converted_move)
+                        if self.move not in Board.w_attacks:
+                            Board.w_attacks.append(self.move)
                 b_occup = Board.b_occupation.get(self.move)
                 if b_occup:
                     converted_move = (Board.squares.get(position)) + "-" + normal_notation_next_square
@@ -420,6 +366,8 @@ class BlackKnight(Board):
                         converted_move = (Board.squares.get(position)) + "-" + convert
                         if converted_move not in Board.w_knights_moves:
                             Board.b_knights_moves.append(converted_move)
+                        if self.move not in Board.b_attacks:
+                            Board.b_attacks.append(self.move)
                 w_occup = Board.w_occupation.get(self.move)
                 if w_occup:
                     converted_move = (Board.squares.get(position)) + "-" + convert
@@ -433,9 +381,10 @@ class WhiteKing(Board):
 
     def king_move(self):
         moves = [12, -12, 13, -13, 11, -11, 1, -1]
-
         for i in range(8):
             self.move = Board.w_king[0] + moves[i]
+            if self.move in Board.b_attacks:
+                continue
             w_occup = Board.w_occupation.get(self.move)
             convert = (Board.squares.get(self.move))
             if w_occup:
@@ -445,11 +394,15 @@ class WhiteKing(Board):
                     converted_move = (Board.squares.get(Board.w_king[0])) + "-" + convert
                     if converted_move not in Board.w_king_moves:
                         Board.w_king_moves.append(converted_move)
+                    if self.move not in Board.w_attacks:
+                        Board.w_attacks.append(self.move)
             b_occup = Board.b_occupation.get(self.move)
             if b_occup:
                 converted_move = (Board.squares.get(Board.w_king[0])) + "-" + convert
                 if converted_move not in Board.w_taking:
                    Board.w_taking.append(converted_move)
+                if self.move not in Board.w_attacks:
+                    Board.w_attacks.append(self.move)
 
 
 class BlackKing(Board):
@@ -460,6 +413,9 @@ class BlackKing(Board):
         moves = [12, -12, 13, -13, 11, -11, 1, -1]
         for i in range(8):
             self.move = Board.b_king[0] + moves[i]
+            print(Board.w_attacks)
+            if self.move in Board.w_attacks:
+                continue
             b_occup = Board.b_occupation.get(self.move)
             convert = (Board.squares.get(self.move))
             if b_occup:
@@ -469,11 +425,15 @@ class BlackKing(Board):
                     converted_move = (Board.squares.get(Board.b_king[0])) + "-" + convert
                     if converted_move not in Board.b_king_moves:
                         Board.b_king_moves.append(converted_move)
+                    if self.move not in Board.b_attacks:
+                        Board.b_attacks.append(self.move)
             w_occup = Board.w_occupation.get(self.move)
             if w_occup:
                 converted_move = (Board.squares.get(Board.b_king[0])) + "-" + convert
                 if converted_move not in Board.b_taking:
                     Board.b_taking.append(converted_move)
+                if self.move not in Board.b_attacks:
+                    Board.b_attacks.append(self.move)
 
 
 class WhiteRook(Board):
@@ -484,7 +444,7 @@ class WhiteRook(Board):
         moves = [1, -1, 12, -12]
         for i in moves:
             for position in Board.w_rooks:
-                next_square = position          #next_square is actually current square - for simplicity
+                next_square = position          # next_square is actually current square - for simplicity
                 for x in range(8):
                     next_square += i
                     on_board = Board.squares.get(next_square)
@@ -496,10 +456,14 @@ class WhiteRook(Board):
                             if b_occupied:
                                 if move not in Board.w_taking:
                                     Board.w_taking.append(move)
+                                if next_square not in Board.w_attacks:
+                                    Board.w_attacks.append(next_square)
                                 break
                             else:
                                 if move not in Board.w_rooks_moves:
                                     Board.w_rooks_moves.append(move)
+                                if next_square not in Board.w_attacks:
+                                    Board.w_attacks.append(next_square)
                         else:
                             break
                     else:
@@ -526,10 +490,14 @@ class BlackRook(Board):
                             if w_occupied:
                                 if move not in Board.b_taking:
                                     Board.b_taking.append(move)
+                                if next_square not in Board.b_attacks:
+                                    Board.b_attacks.append(next_square)
                                 break
                             else:
                                 if move not in Board.b_rooks_moves:
                                     Board.b_rooks_moves.append(move)
+                                if next_square not in Board.b_attacks:
+                                    Board.b_attacks.append(next_square)
                         else:
                             break
                     else:
@@ -557,10 +525,14 @@ class WhiteBishop(Board):
                             if b_occupied:
                                 if move not in Board.w_taking:
                                     Board.w_taking.append(move)
+                                if next_square not in Board.w_attacks:
+                                    Board.w_attacks.append(next_square)
                                 break
                             else:
                                 if move not in Board.w_bishops_moves:
                                     Board.w_bishops_moves.append(move)
+                                if next_square not in Board.w_attacks:
+                                    Board.w_attacks.append(next_square)
                         else:
                             break
                     else:
@@ -588,10 +560,14 @@ class BlackBishop(Board):
                             if w_occupied:
                                 if move not in Board.b_taking:
                                     Board.b_taking.append(move)
+                                if next_square not in Board.b_attacks:
+                                    Board.b_attacks.append(next_square)
                                 break
                             else:
                                 if move not in Board.b_bishops_moves:
                                     Board.b_bishops_moves.append(move)
+                                if next_square not in Board.b_attacks:
+                                    Board.b_attacks.append(next_square)
                         else:
 
                             break
@@ -620,10 +596,14 @@ class WhiteQueen(Board):
                             if b_occupied:
                                 if move not in Board.w_taking:
                                     Board.w_taking.append(move)
+                                if next_square not in Board.w_attacks:
+                                    Board.w_attacks.append(next_square)
                                 break
                             else:
                                 if move not in Board.w_queen_moves:
                                     Board.w_queen_moves.append(move)
+                                if next_square not in Board.w_attacks:
+                                    Board.w_attacks.append(next_square)
                         else:
                             break
                     else:
@@ -645,10 +625,14 @@ class WhiteQueen(Board):
                             if b_occupied:
                                 if move not in Board.w_taking:
                                     Board.w_taking.append(move)
+                                if next_square not in Board.w_attacks:
+                                    Board.w_attacks.append(next_square)
                                 break
                             else:
                                 if move not in Board.w_queen_moves:
                                     Board.w_queen_moves.append(move)
+                                if next_square not in Board.w_attacks:
+                                    Board.w_attacks.append(next_square)
                         else:
                             break
                     else:
@@ -676,10 +660,14 @@ class BlackQueen(Board):
                             if w_occupied:
                                 if move not in Board.b_taking:
                                     Board.b_taking.append(move)
+                                if next_square not in Board.b_attacks:
+                                    Board.b_attacks.append(next_square)
                                 break
                             else:
                                 if move not in Board.b_queen_moves:
                                     Board.b_queen_moves.append(move)
+                                if next_square not in Board.b_attacks:
+                                    Board.b_attacks.append(next_square)
                         else:
 
                             break
@@ -689,7 +677,7 @@ class BlackQueen(Board):
     def rook_like_move(self):
         moves = [1, -1, 12, -12]
         for i in moves:
-            for position in Board.w_queen:
+            for position in Board.b_queen:
                 next_square = position
                 for x in range(8):
                     next_square += i
@@ -702,10 +690,14 @@ class BlackQueen(Board):
                             if w_occupied:
                                 if move not in Board.b_taking:
                                     Board.b_taking.append(move)
+                                if next_square not in Board.b_attacks:
+                                    Board.b_attacks.append(next_square)
                                 break
                             else:
                                 if move not in Board.b_queen_moves:
                                     Board.b_queen_moves.append(move)
+                                if next_square not in Board.b_attacks:
+                                    Board.b_attacks.append(next_square)
                         else:
                             break
                     else:
@@ -718,46 +710,51 @@ class White_Pawn(Board):
         self.move = int
 
     def pawn_move(self):
-        self.move = Board.w_pawns[Board.piece] + 12
-        r_taking = Board.b_occupation.get((Board.w_pawns[Board.piece]) + 13)
-        l_taking = Board.b_occupation.get((Board.w_pawns[Board.piece]) + 11)
-        if r_taking:
-            r_take_square = (Board.squares.get((Board.w_pawns[Board.piece]) + 13))
-            converted_move = (Board.squares.get(Board.w_pawns[Board.piece])) + "-" + r_take_square
-            if converted_move not in Board.w_taking:
-                Board.w_taking.append(converted_move)
-        if l_taking:
-            l_take_square = (Board.squares.get((Board.w_pawns[Board.piece]) + 11))
-            converted_move = (Board.squares.get(Board.w_pawns[Board.piece])) + "-" + l_take_square
-            if converted_move not in Board.w_taking:
-                Board.w_taking.append(converted_move)
-        w_occup = Board.w_occupation.get(self.move)
-        b_occup = Board.b_occupation.get(self.move)
-        if not b_occup and not w_occup:
-            convert = (Board.squares.get(self.move))
-            if convert:  #check for 8th rank
-                converted_move = (Board.squares.get(Board.w_pawns[Board.piece])) + "-" + convert
-                if converted_move not in Board.w_pawns_moves:
-                    Board.w_pawns_moves.append(converted_move)
+        for position in Board.w_pawns:
+            r_taking = Board.b_occupation.get(position + 13)
+            l_taking = Board.b_occupation.get(position + 11)
+            r_take_square = (Board.squares.get(position + 13))
+            l_take_square = (Board.squares.get(position + 11))
+            if (position + 13) not in Board.w_attacks:
+                if r_take_square:
+                    Board.w_attacks.append(position + 13)
+            if (position + 11) not in Board.w_attacks:
+                if l_take_square:
+                    Board.w_attacks.append(position + 11)
+            if r_taking:
+                converted_move = (Board.squares.get(position)) + "-" + r_take_square
+                if converted_move not in Board.w_taking:
+                    Board.w_taking.append(converted_move)
+            if l_taking:
+                converted_move = (Board.squares.get(position)) + "-" + l_take_square
+                if converted_move not in Board.w_taking:
+                    Board.w_taking.append(converted_move)
+            self.move = position + 12
+            w_occup = Board.w_occupation.get(self.move)
+            b_occup = Board.b_occupation.get(self.move)
+            if not b_occup and not w_occup:
+                convert = (Board.squares.get(self.move))
+                if convert:  # check for 8th rank
+                    converted_move = (Board.squares.get(position)) + "-" + convert
+                    if converted_move not in Board.w_pawns_moves:
+                        Board.w_pawns_moves.append(converted_move)
 
     def double_move(self):
         starting = [39, 40, 41, 42, 43, 44, 45, 46]
-        if Board.w_pawns[Board.piece] in starting:
-            self.move = Board.w_pawns[Board.piece] + 24
-            w_occup = Board.w_occupation.get(self.move)
-            w_occup2 = Board.w_occupation.get((self.move - 12))
-            if w_occup or w_occup2:
-                return
-            b_occup = Board.b_occupation.get(self.move)
-            b_occup2 = Board.b_occupation.get((self.move - 12))
-            if b_occup or b_occup2:
-                return
-            convert = (Board.squares.get(self.move))
-            converted_move = (Board.squares.get(Board.w_pawns[Board.piece])) + "-" + convert
-            if converted_move not in Board.w_pawns_moves:
-                Board.w_pawns_moves.append(converted_move)
-        else:
-            pass
+        for position in Board.w_pawns:
+            if position in starting:
+                self.move = position + 24
+                w_occup = Board.w_occupation.get(self.move)
+                w_occup2 = Board.w_occupation.get((self.move - 12))
+                b_occup = Board.b_occupation.get(self.move)
+                b_occup2 = Board.b_occupation.get((self.move - 12))
+                if not(w_occup or w_occup2 or b_occup or b_occup2):
+                    convert = (Board.squares.get(self.move))
+                    converted_move = (Board.squares.get(position)) + "-" + convert
+                    if converted_move not in Board.w_pawns_moves:
+                        Board.w_pawns_moves.append(converted_move)
+            else:
+                pass
 
 
 class Black_Pawn(Board):
@@ -767,46 +764,51 @@ class Black_Pawn(Board):
         self.move = int
 
     def pawn_move(self):
-        self.move = Board.b_pawns[Board.piece] - 12
-        r_taking = Board.w_occupation.get((Board.b_pawns[Board.piece]) - 13)
-        l_taking = Board.w_occupation.get((Board.b_pawns[Board.piece]) - 11)
-        if r_taking:
-            r_take_square = (Board.squares.get((Board.b_pawns[Board.piece]) - 13))
-            converted_move = (Board.squares.get(Board.b_pawns[Board.piece])) + "-" + r_take_square
-            if converted_move not in Board.b_taking:
-                Board.b_taking.append(converted_move)
-        if l_taking:
-            l_take_square = (Board.squares.get((Board.b_pawns[Board.piece]) - 11))
-            converted_move = (Board.squares.get(Board.b_pawns[Board.piece])) + "-" + l_take_square
-            if converted_move not in Board.b_taking:
-                Board.b_taking.append(converted_move)
-        w_occup = Board.w_occupation.get(self.move)
-        b_occup = Board.b_occupation.get(self.move)
-        if not w_occup and not b_occup:
-            convert = (Board.squares.get(self.move))
-            if convert:
-                converted_move = (Board.squares.get(Board.b_pawns[Board.piece])) + "-" + convert
-                if converted_move not in Board.b_pawns_moves:
-                    Board.b_pawns_moves.append(converted_move)
+        for position in Board.b_pawns:
+            self.move = position - 12
+            r_taking = Board.w_occupation.get((position) - 13)
+            l_taking = Board.w_occupation.get((position) - 11)
+            r_take_square = (Board.squares.get(position - 13))
+            l_take_square = (Board.squares.get(position - 11))
+            if (position - 13) not in Board.b_attacks:
+                if r_take_square:
+                    Board.b_attacks.append(position - 13)
+            if (position - 11) not in Board.b_attacks:
+                if l_take_square:
+                    Board.b_attacks.append(position - 11)
+            if r_taking:
+                converted_move = (Board.squares.get(position)) + "-" + r_take_square
+                if converted_move not in Board.b_taking:
+                    Board.b_taking.append(converted_move)
+            if l_taking:
+                converted_move = (Board.squares.get(position)) + "-" + l_take_square
+                if converted_move not in Board.b_taking:
+                    Board.b_taking.append(converted_move)
+            w_occup = Board.w_occupation.get(self.move)
+            b_occup = Board.b_occupation.get(self.move)
+            if not w_occup and not b_occup:
+                convert = (Board.squares.get(self.move))
+                if convert:
+                    converted_move = (Board.squares.get(position)) + "-" + convert
+                    if converted_move not in Board.b_pawns_moves:
+                        Board.b_pawns_moves.append(converted_move)
 
     def double_move(self):
         starting = [99, 100, 101, 102, 103, 104, 105, 106]
-        if Board.b_pawns[Board.piece] in starting:
-            self.move = Board.b_pawns[Board.piece] - 24
-            b_occup = Board.b_occupation.get(self.move)
-            b_occup2 = Board.b_occupation.get((self.move + 12))
-            if b_occup or b_occup2:
-                return
-            w_occup = Board.w_occupation.get(self.move)
-            w_occup2 = Board.w_occupation.get((self.move + 12))
-            if w_occup or w_occup2:
-                return
-            convert = (Board.squares.get(self.move))
-            converted_move = (Board.squares.get(Board.b_pawns[Board.piece])) + "-" + convert
-            if converted_move not in Board.b_pawns_moves:
-                Board.b_pawns_moves.append(converted_move)
-        else:
-            pass
+        for position in Board.b_pawns:
+            if position in starting:
+                self.move = position - 24
+                w_occup = Board.w_occupation.get(self.move)
+                w_occup2 = Board.w_occupation.get((self.move + 12))
+                b_occup = Board.b_occupation.get(self.move)
+                b_occup2 = Board.b_occupation.get((self.move + 12))
+                if not (w_occup or w_occup2 or b_occup or b_occup2):
+                    convert = (Board.squares.get(self.move))
+                    converted_move = (Board.squares.get(position)) + "-" + convert
+                    if converted_move not in Board.b_pawns_moves:
+                        Board.b_pawns_moves.append(converted_move)
+            else:
+                pass
 
 
 w_rook = WhiteRook()
@@ -826,7 +828,6 @@ board = Board()
 
 
 def w_main():
-    board.WhiteOccupation()
     move.w_take()
 
     w_rook.rook_move()
@@ -837,41 +838,12 @@ def w_main():
     w_queen.bishop_like_move()
     w_queen.rook_like_move()
 
-    w_king.king_move()
+    w_pawn.pawn_move()
+    w_pawn.double_move()
 
-    piece_count = len(Board.w_pawns)
-    if piece_count >= 1:
-        w_pawn.piece1()
-        w_pawn.pawn_move()
-        w_pawn.double_move()
-        if piece_count >= 2:
-            w_pawn.piece2()
-            w_pawn.pawn_move()
-            w_pawn.double_move()
-            if piece_count >= 3:
-                w_pawn.piece3()
-                w_pawn.pawn_move()
-                w_pawn.double_move()
-                if piece_count >= 4:
-                    w_pawn.piece4()
-                    w_pawn.pawn_move()
-                    w_pawn.double_move()
-                    if piece_count >= 5:
-                        w_pawn.piece5()
-                        w_pawn.pawn_move()
-                        w_pawn.double_move()
-                        if piece_count >= 6:
-                            w_pawn.piece6()
-                            w_pawn.pawn_move()
-                            w_pawn.double_move()
-                            if piece_count >= 7:
-                                w_pawn.piece7()
-                                w_pawn.pawn_move()
-                                w_pawn.double_move()
-                                if piece_count >= 8:
-                                    w_pawn.piece8()
-                                    w_pawn.pawn_move()
-                                    w_pawn.double_move()
+    w_king.king_move()
+    #Board.b_attacks = []
+
 
 
 def w_get_squares(selected_square):
@@ -885,78 +857,33 @@ def main_w_move(square_to_go):
 
 
 def b_main():
-    board.BlackOccupation()
     move.b_take()
 
-    piece_count = len(Board.b_rooks)
-    if piece_count >= 1:
-        b_rook.piece1()
-        b_rook.rook_move()
-        if piece_count >= 2:
-            b_rook.piece2()
-            b_rook.rook_move()
+    b_rook.rook_move()
 
-    b_king.piece1()
-    b_king.king_move()
+    b_knight.b_knight_move()
 
-    piece_count = len(Board.b_knights)
-    if piece_count >= 1:
-        b_knight.piece1()
-        b_knight.b_knight_move()
-        if piece_count >= 2:
-            b_knight.piece2()
-            b_knight.b_knight_move()
+    b_bishop.bishop_move()
 
-    piece_count = len(Board.b_bishops)
-    if piece_count >= 1:
-        b_bishop.piece1()
-        b_bishop.bishop_move()
-        if piece_count >= 2:
-            b_bishop.piece2()
-            b_bishop.bishop_move()
-
-    b_queen.piece1()
     b_queen.bishop_like_move()
     b_queen.rook_like_move()
 
-    piece_count = len(Board.b_pawns)
-    if piece_count >= 1:
-        b_pawn.piece1()
-        b_pawn.pawn_move()
-        b_pawn.double_move()
-        if piece_count >= 2:
-            b_pawn.piece2()
-            b_pawn.pawn_move()
-            b_pawn.double_move()
-            if piece_count >= 3:
-                b_pawn.piece3()
-                b_pawn.pawn_move()
-                b_pawn.double_move()
-                if piece_count >= 4:
-                    b_pawn.piece4()
-                    b_pawn.pawn_move()
-                    b_pawn.double_move()
-                    if piece_count >= 5:
-                        b_pawn.piece5()
-                        b_pawn.pawn_move()
-                        b_pawn.double_move()
-                        if piece_count >= 6:
-                            b_pawn.piece6()
-                            b_pawn.pawn_move()
-                            b_pawn.double_move()
-                            if piece_count >= 7:
-                                b_pawn.piece7()
-                                b_pawn.pawn_move()
-                                b_pawn.double_move()
-                                if piece_count >= 8:
-                                    b_pawn.piece8()
-                                    b_pawn.pawn_move()
-                                    b_pawn.double_move()
+    b_pawn.pawn_move()
+    b_pawn.double_move()
+
+    b_king.king_move()
+   # Board.w_attacks = []
+
 
 def main_b_move(square_to_go):
     move.b_make_move(square_to_go)
     move.clean_piece_moves()
 
+
 def b_get_squares(selected_square):
     move.b_get_squares(selected_square)
 
+
+def create_occupation_lists():
+    board.WhiteOccupation()
+    board.BlackOccupation()
