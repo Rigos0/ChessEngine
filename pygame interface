@@ -2,7 +2,6 @@ import pygame
 from Board import *
 import ctypes
 import time
-import gc
 
 pygame.init()
 
@@ -51,7 +50,7 @@ def square_to_pos(square):
     return pos
 
 
-chess_board = pygame.image.load("chessboard.jpg")
+chess_board = pygame.image.load("chessboard.png")
 chess_board = pygame.transform.scale(chess_board, (640, 640))
 
 
@@ -223,6 +222,7 @@ def WhiteMove(surface):
                         global square_to_go
                         square_to_go = previous_selected_square[counter - 2] + "-" + i
                         main_w_move(square_to_go)
+                        Board.w_attacks = []
                         return
 
                 blitdots = True
@@ -230,6 +230,7 @@ def WhiteMove(surface):
             if event.type == pygame.VIDEORESIZE:
                 surface = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
 
+        b_main()
         w_main()
         w_get_squares(selected_square)
         blit_pawn()
@@ -283,10 +284,12 @@ def BlackMove(surface):
                         global square_to_go
                         square_to_go = previous_selected_square[counter - 2] + "-" + i
                         main_b_move(square_to_go)
+                        Board.b_attacks = []
                         return
 
                 blitdots = True
 
+        w_main()
         b_main()
         b_get_squares(selected_square)
         blit_pawn()
@@ -317,6 +320,5 @@ SW_MAXIMISE = 3
 hWnd = user32.GetForegroundWindow()
 user32.ShowWindow(hWnd, SW_MAXIMISE)
 while True:
-    gc.collect()
     WhiteMove(surface)
     BlackMove(surface)
