@@ -33,6 +33,9 @@ class Board:
         Board.b_occupation = {}
         Board.w_attacks = []
         Board.b_attacks = []
+        Board.w_enpassant = []
+        Board.b_enpassant = []
+        Board.w_block_check = []
         Board.the_game = []
 
         Board.squares = {
@@ -133,7 +136,7 @@ class Move(Board):
         Move.dots = []
         move = selected_square
         w_lists = [Board.w_knights_moves, Board.w_pawns_moves, Board.w_queen_moves, Board.w_bishops_moves,
-                   Board.w_rooks_moves, Board.w_king_moves, Board.w_taking]
+                   Board.w_rooks_moves, Board.w_king_moves, Board.w_taking, Board.w_enpassant]
 
         for x in w_lists:
             for i in x:
@@ -149,7 +152,7 @@ class Move(Board):
         Move.dots = []
         move = selected_square
         b_lists = [Board.b_knights_moves, Board.b_pawns_moves, Board.b_queen_moves, Board.b_bishops_moves,
-                   Board.b_rooks_moves, Board.b_king_moves, Board.b_taking]
+                   Board.b_rooks_moves, Board.b_king_moves, Board.b_taking, Board.b_enpassant]
         for x in b_lists:
             for i in x:
                 try:
@@ -161,6 +164,55 @@ class Move(Board):
                 except IndexError:
                     pass
 
+    def w_in_check(self):
+        if Board.w_king[0] in Board.b_attacks:
+            white_in_check = True
+        else:
+            white_in_check = False
+        return white_in_check
+
+    def w_delete_moves_if_check(self, check):
+        if check:
+            for i in Board.w_pawns_moves:
+                try:
+                    next_square = i[3] + i[4]
+                    if next_square not in Board.w_block_check:
+                        Board.w_pawns_moves.remove(i)
+                except IndexError:
+                    pass
+            for i in Board.w_queen_moves:
+                try:
+                    next_square = i[3] + i[4]
+                    if next_square not in Board.w_block_check:
+                        Board.w_queen_moves.remove(i)
+                except IndexError:
+                    pass
+            for i in Board.w_bishops_moves:
+                try:
+                    next_square = i[3] + i[4]
+                    if next_square not in Board.w_block_check:
+                        Board.w_bishops_moves.remove(i)
+                except IndexError:
+                    pass
+            for i in Board.w_knights_moves:
+                try:
+                    next_square = i[3] + i[4]
+                    if next_square not in Board.w_block_check:
+                        Board.w_knights_moves.remove(i)
+                except IndexError:
+                    pass
+            for i in Board.w_rooks_moves:
+                try:
+                    next_square = i[3] + i[4]
+                    if next_square not in Board.w_block_check:
+                        Board.w_rooks_moves.remove(i)
+                except IndexError:
+                    pass
+
+
+        Board.b_attacks = []
+
+
     def w_make_move(self, square_to_go):
         move = square_to_go
         sel_piece = move[0] + move[1]
@@ -171,23 +223,25 @@ class Move(Board):
         Board.the_game.append(move)                       # notate the game to allow takebacks and en passant
         new_pos = (key_list[val_list.index(sel_square)])
 
-        if move in Board.w_bishops_moves:
-            piece_position = Board.w_bishops.index(piece)
+        if move in Board.w_enpassant:
+            piece_position = Board.w_pawns.index(piece)
             sel_square = move[3] + move[4]
             new_pos = (key_list[val_list.index(sel_square)])
+            Board.w_pawns[piece_position] = new_pos
+            Board.b_pawns.remove(new_pos - 12)
+        Board.w_enpassant = []
 
+        if move in Board.w_bishops_moves:
+            piece_position = Board.w_bishops.index(piece)
             Board.w_bishops[piece_position] = new_pos
 
         if move in Board.w_rooks_moves:
             piece_position = Board.w_rooks.index(piece)
-            sel_square = move[3] + move[4]
-            new_pos = (key_list[val_list.index(sel_square)])
             Board.w_rooks[piece_position] = new_pos
 
         if move in Board.w_knights_moves:
             piece_position = Board.w_knights.index(piece)
             Board.w_knights[piece_position] = new_pos
-            Board.w_knights_moves = []
 
         if move in Board.w_king_moves:
             if move == "e1-g1":
@@ -206,41 +260,20 @@ class Move(Board):
 
         if move in Board.w_queen_moves:
             piece_position = Board.w_queen.index(piece)
-            sel_square = move[3] + move[4]
-            new_pos = (key_list[val_list.index(sel_square)])
-
             Board.w_queen[piece_position] = new_pos
 
-        for possible_move in Board.w_pawns_moves:
-            if possible_move.endswith("en"):
-                Board.w_pawns_moves.remove(possible_move)
-                possible_move = possible_move[:-2]
-                Board.w_pawns_moves.append(possible_move)
-                Board.b_pawns.remove(new_pos-12)
-
         if move in Board.w_pawns_moves:
-            double_moves = ["a2-a4", "b2-b4", "c2-c4", "d2-d4", "e2-e4", "f2-f4", "g2-g4", "h2-h4"] #check for en passant
-            for i in double_moves:
-                if move == i:
-                    square_to_convert = i[3] + i[4]
-                    square_number = list(Board.squares.keys())[list(Board.squares.values()).index(square_to_convert)]
-                    for pawn in Board.b_pawns:
-                        if pawn == square_number + 1:
-                            current_square = Board.squares.get(square_number + 1)
-                            next_square = Board.squares.get(square_number - 12)
-                            the_move = current_square + "-" + next_square + "en"
-                            Board.b_pawns_moves.append(the_move)
-                        if pawn == square_number - 1:
-                            current_square = Board.squares.get(square_number - 1)
-                            next_square = Board.squares.get(square_number - 12)
-                            the_move = current_square + "-" + next_square + "en"
-                            Board.b_pawns_moves.append(the_move)
-
+            double_moves = ["a2-a4", "b2-b4", "c2-c4", "d2-d4","e2-e4","f2-f4","g2-g4","h2-h4"]
+            for x in double_moves:
+                if move == x:
+                    if (new_pos + 1) in Board.b_pawns:
+                        enpassant_move = Board.squares.get(new_pos + 1) + "-" + Board.squares.get(new_pos - 12)
+                        Board.b_enpassant.append(enpassant_move)
+                    if (new_pos - 1) in Board.b_pawns:
+                        enpassant_move = Board.squares.get(new_pos - 1) + "-" + Board.squares.get(new_pos - 12)
+                        Board.b_enpassant.append(enpassant_move)
 
             piece_position = Board.w_pawns.index(piece)
-            sel_square = move[3] + move[4]
-            new_pos = (key_list[val_list.index(sel_square)])
-
             Board.w_pawns[piece_position] = new_pos
 
         if move in Board.w_taking:
@@ -253,10 +286,15 @@ class Move(Board):
             for x in w_lists:
                 if piece in x:
                     piece_position = x.index(piece)
-                    sel_square = move[3] + move[4]
-                    new_pos = (key_list[val_list.index(sel_square)])
-
                     x[piece_position] = new_pos
+
+        for w_pawn in Board.w_pawns:                                  #check for promotion
+            if w_pawn > 108:
+                Board.w_pawns.remove(w_pawn)
+                Board.w_queen.append(w_pawn)
+
+        Board.w_attacks = []
+
 
 
     def b_make_move(self, square_to_go):
@@ -272,16 +310,18 @@ class Move(Board):
         Board.the_game.append(move)
         new_pos = (key_list[val_list.index(sel_square)])
 
+        if move in Board.b_enpassant:
+            piece_position = Board.b_pawns.index(piece)
+            Board.b_pawns[piece_position] = new_pos
+            Board.w_pawns.remove(new_pos + 12)
+        Board.b_enpassant = []
+
         if move in Board.b_bishops_moves:
             piece_position = Board.b_bishops.index(piece)
-            sel_square = move[3] + move[4]
-            new_pos = (key_list[val_list.index(sel_square)])
             Board.b_bishops[piece_position] = new_pos
 
         if move in Board.b_rooks_moves:
             piece_position = Board.b_rooks.index(piece)
-            sel_square = move[3] + move[4]
-            new_pos = (key_list[val_list.index(sel_square)])
             Board.b_rooks[piece_position] = new_pos
 
         if move in Board.b_knights_moves:
@@ -309,30 +349,16 @@ class Move(Board):
             new_pos = (key_list[val_list.index(sel_square)])
             Board.b_queen[piece_position] = new_pos
 
-        for possible_move in Board.b_pawns_moves:
-            if possible_move.endswith("en"):
-                Board.b_pawns_moves.remove(possible_move)
-                possible_move = possible_move[:-2]
-                Board.b_pawns_moves.append(possible_move)
-                Board.w_pawns.remove(new_pos+12)
-
         if move in Board.b_pawns_moves:
-            double_moves = ["a7-a5", "b7-b5", "c7-c5", "d7-d5", "e7-e5", "f7-f5", "g7-g5", "h7-h5"] #check for en passant
-            for i in double_moves:
-                if move == i:
-                    square_to_convert = i[3] + i[4]
-                    square_number = list(Board.squares.keys())[list(Board.squares.values()).index(square_to_convert)]
-                    for pawn in Board.w_pawns:
-                        if pawn == square_number + 1:
-                            current_square = Board.squares.get(square_number + 1)
-                            next_square = Board.squares.get(square_number + 12)
-                            the_move = current_square + "-" + next_square + "en"
-                            Board.w_pawns_moves.append(the_move)
-                        if pawn == square_number - 1:
-                            current_square = Board.squares.get(square_number - 1)
-                            next_square = Board.squares.get(square_number + 12)
-                            the_move = current_square + "-" + next_square + "en"
-                            Board.w_pawns_moves.append(the_move)
+            double_moves = ["a7-a5", "b7-b5", "c7-c5", "d7-d5", "e7-e5", "f7-f5", "g7-g5", "h7-h5"]
+            for x in double_moves:
+                if move == x:
+                    if (new_pos + 1) in Board.w_pawns:
+                        enpassant_move = Board.squares.get(new_pos + 1) + "-" + Board.squares.get(new_pos + 12)
+                        Board.w_enpassant.append(enpassant_move)
+                    if (new_pos - 1) in Board.w_pawns:
+                        enpassant_move = Board.squares.get(new_pos - 1) + "-" + Board.squares.get(new_pos + 12)
+                        Board.w_enpassant.append(enpassant_move)
 
             piece_position = Board.b_pawns.index(piece)
             sel_square = move[3] + move[4]
@@ -351,25 +377,26 @@ class Move(Board):
                     piece_position = x.index(piece)
                     sel_square = move[3] + move[4]
                     new_pos = (key_list[val_list.index(sel_square)])
-
                     x[piece_position] = new_pos
 
+        for b_pawn in Board.b_pawns:  # check for promotion
+            if b_pawn < 35:
+                Board.b_pawns.remove(b_pawn)
+                Board.b_queen.append(b_pawn)
 
-    def w_clean_piece_moves(self):
+    def clean_piece_moves(self):
         Board.w_pawns_moves = []
         Board.w_queen_moves = []
         Board.w_rooks_moves = []
+        Board.b_rooks_moves = []
         Board.w_knights_moves = []
         Board.w_bishops_moves = []
-        Board.w_taking = []
-        Board.w_king_moves = []
-
-    def b_clean_piece_moves(self):
-        Board.b_rooks_moves = []
         Board.b_pawns_moves = []
         Board.b_knights_moves = []
         Board.b_queen_moves = []
+        Board.w_taking = []
         Board.b_taking = []
+        Board.w_king_moves = []
         Board.b_king_moves = []
         Board.b_bishops_moves = []
 
@@ -695,6 +722,12 @@ class BlackBishop(Board):
                 for x in range(8):
                     next_square += i
                     if next_square == Board.w_king[0]:
+                        buffer = next_square
+                        while not buffer == position:
+                            buffer -= i
+                            convert_buffer = Board.squares.get(buffer)
+                            Board.w_block_check.append(convert_buffer)
+
                         Board.b_attacks.append(next_square + i)
                     on_board = Board.squares.get(next_square)
                     if on_board:
@@ -913,6 +946,7 @@ class White_Pawn(Board):
                 pass
 
 
+
 class Black_Pawn(Board):
     def __init__(self):
         Board.__init__(self)
@@ -963,6 +997,7 @@ class Black_Pawn(Board):
                     converted_move = (Board.squares.get(position)) + "-" + convert
                     if converted_move not in Board.b_pawns_moves:
                         Board.b_pawns_moves.append(converted_move)
+
             else:
                 pass
 
@@ -984,6 +1019,7 @@ board = Board()
 
 
 def w_main():
+    check = move.w_in_check()
     move.w_take()
 
     w_rook.rook_move()
@@ -1001,6 +1037,7 @@ def w_main():
     w_king.short_castling()
     w_king.long_castling()
 
+    move.w_delete_moves_if_check(check)
 
 
 def w_get_squares(selected_square):
@@ -1010,7 +1047,7 @@ def w_get_squares(selected_square):
 def main_w_move(square_to_go):
 
     move.w_make_move(square_to_go)
-    move.w_clean_piece_moves()
+    move.clean_piece_moves()
 
 
 def b_main():
@@ -1035,7 +1072,8 @@ def b_main():
 
 def main_b_move(square_to_go):
     move.b_make_move(square_to_go)
-    move.b_clean_piece_moves()
+    move.w_in_check()
+    move.clean_piece_moves()
 
 
 def b_get_squares(selected_square):
