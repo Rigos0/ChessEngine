@@ -201,6 +201,7 @@ def WhiteMove(surface):
     counter = 0
     create_occupation_lists()
     timesleep = 0.1
+    mouse_down = False
 
     while True:
         surface.fill((0, 0, 0))
@@ -211,6 +212,7 @@ def WhiteMove(surface):
                 quit()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_down = True
                 timesleep = 0
                 x, y = pygame.mouse.get_pos()
                 selected_square = get_square(x, y)
@@ -223,6 +225,7 @@ def WhiteMove(surface):
                         square_to_go = previous_selected_square[counter - 2] + "-" + i
                         main_w_move(square_to_go)
                         Board.w_attacks = []
+                        mouse_down = False
                         return
 
                 blitdots = True
@@ -230,8 +233,9 @@ def WhiteMove(surface):
             if event.type == pygame.VIDEORESIZE:
                 surface = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
 
-        b_main()
-        w_main()
+        if not mouse_down:
+            b_main()
+            w_main()
         w_get_squares(selected_square)
         blit_pawn()
         blit_bishop()
@@ -261,6 +265,7 @@ def BlackMove(surface):
     counter = 0
     create_occupation_lists()
     timesleep = 0.1
+    mouse_down = False
 
     while True:
         surface.fill((0, 0, 0))
@@ -273,6 +278,7 @@ def BlackMove(surface):
                 surface = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
 
             if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_down = True
                 timesleep = 0
                 x, y = pygame.mouse.get_pos()
                 selected_square = get_square(x, y)
@@ -284,13 +290,14 @@ def BlackMove(surface):
                         global square_to_go
                         square_to_go = previous_selected_square[counter - 2] + "-" + i
                         main_b_move(square_to_go)
-                        Board.b_attacks = []
+                        mouse_down = False
                         return
 
                 blitdots = True
 
-        w_main()
-        b_main()
+        if not mouse_down:
+            w_main()
+            b_main()
         b_get_squares(selected_square)
         blit_pawn()
         blit_bishop()
