@@ -36,6 +36,9 @@ class Board:
         Board.w_enpassant = []
         Board.b_enpassant = []
         Board.w_block_check = []
+        Board.b_block_check = []
+        Board.w_pins = []
+        Board.b_pins = []
         Board.the_game = []
 
         Board.squares = {
@@ -171,46 +174,89 @@ class Move(Board):
             white_in_check = False
         return white_in_check
 
+    def b_in_check(self):
+        if Board.b_king[0] in Board.w_attacks:
+            black_in_check = True
+        else:
+            black_in_check = False
+        return black_in_check
+
     def w_delete_moves_if_check(self, check):
+        w_king_position = Board.squares.get(Board.w_king[0])
+        buffer_list = []
         if check:
             for i in Board.w_pawns_moves:
-                try:
-                    next_square = i[3] + i[4]
-                    if next_square not in Board.w_block_check:
-                        Board.w_pawns_moves.remove(i)
-                except IndexError:
-                    pass
+                if i[3] + i[4] in Board.w_block_check:
+                    buffer_list.append(i)
+            Board.w_pawns_moves = buffer_list
+            buffer_list = []
             for i in Board.w_queen_moves:
-                try:
-                    next_square = i[3] + i[4]
-                    if next_square not in Board.w_block_check:
-                        Board.w_queen_moves.remove(i)
-                except IndexError:
-                    pass
-            for i in Board.w_bishops_moves:
-                try:
-                    next_square = i[3] + i[4]
-                    if next_square not in Board.w_block_check:
-                        Board.w_bishops_moves.remove(i)
-                except IndexError:
-                    pass
+                if i[3] + i[4] in Board.w_block_check:
+                    buffer_list.append(i)
+            Board.w_queen_moves = buffer_list
+            buffer_list = []
             for i in Board.w_knights_moves:
-                try:
-                    next_square = i[3] + i[4]
-                    if next_square not in Board.w_block_check:
-                        Board.w_knights_moves.remove(i)
-                except IndexError:
-                    pass
+                if i[3] + i[4] in Board.w_block_check:
+                    buffer_list.append(i)
+            Board.w_knights_moves = buffer_list
+            buffer_list = []
+            for i in Board.w_bishops_moves:
+                if i[3] + i[4] in Board.w_block_check:
+                    buffer_list.append(i)
+            Board.w_bishops_moves = buffer_list
+            buffer_list = []
             for i in Board.w_rooks_moves:
-                try:
-                    next_square = i[3] + i[4]
-                    if next_square not in Board.w_block_check:
-                        Board.w_rooks_moves.remove(i)
-                except IndexError:
-                    pass
+                if i[3] + i[4] in Board.w_block_check:
+                    buffer_list.append(i)
+            Board.w_rooks_moves = buffer_list
+            buffer_list = []
+            for i in Board.w_taking:
+                if i[3] + i[4] in Board.w_block_check:
+                    buffer_list.append(i)
+                if i[0] + i[1] == w_king_position:
+                    buffer_list.append(i)
 
-
+            Board.w_taking = buffer_list
+        Board.w_block_check = []
         Board.b_attacks = []
+
+    def b_delete_moves_if_check(self, check):
+        b_king_position = Board.squares.get(Board.w_king[0])
+        buffer_list = []
+        if check:
+            for i in Board.b_pawns_moves:
+                if i[3] + i[4] in Board.b_block_check:
+                    buffer_list.append(i)
+            Board.b_pawns_moves = buffer_list
+            buffer_list = []
+            for i in Board.b_queen_moves:
+                if i[3] + i[4] in Board.b_block_check:
+                    buffer_list.append(i)
+            Board.b_queen_moves = buffer_list
+            buffer_list = []
+            for i in Board.b_knights_moves:
+                if i[3] + i[4] in Board.b_block_check:
+                    buffer_list.append(i)
+            Board.b_knights_moves = buffer_list
+            buffer_list = []
+            for i in Board.b_bishops_moves:
+                if i[3] + i[4] in Board.b_block_check:
+                    buffer_list.append(i)
+            Board.b_bishops_moves = buffer_list
+            buffer_list = []
+            for i in Board.b_rooks_moves:
+                if i[3] + i[4] in Board.b_block_check:
+                    buffer_list.append(i)
+            Board.b_rooks_moves = buffer_list
+            buffer_list = []
+            for i in Board.b_taking:
+                if i[3] + i[4] in Board.b_block_check:
+                    buffer_list.append(i)
+                if i[0] + i[1] == b_king_position:
+                    buffer_list.append(i)
+            Board.b_taking = buffer_list
+        Board.b_block_check = []
+        Board.w_attacks = []
 
 
     def w_make_move(self, square_to_go):
@@ -426,6 +472,9 @@ class WhiteKnight(Board):
         for i in range(8):
             for position in Board.w_knights:
                 self.move = position + moves[i]
+                if Board.b_king[0] == self.move:    #allow taking the knight if check
+                    buffer = Board.squares.get(position)
+                    Board.b_block_check.append(buffer)
                 w_occup = Board.w_occupation.get(self.move)
                 normal_notation_next_square = (Board.squares.get(self.move))
                 if w_occup:
@@ -455,6 +504,9 @@ class BlackKnight(Board):
         for i in range(8):
             for position in Board.b_knights:
                 self.move = position + moves[i]
+                if Board.w_king[0] == self.move:    #allow taking the knight if check
+                    buffer = Board.squares.get(position)
+                    Board.w_block_check.append(buffer)
                 b_occup = Board.b_occupation.get(self.move)
                 convert = (Board.squares.get(self.move))
                 if b_occup:
@@ -609,6 +661,12 @@ class WhiteRook(Board):
                 for x in range(8):
                     next_square += i
                     if next_square == Board.b_king[0]:
+                        buffer = next_square
+                        while not buffer == position:
+                            buffer -= i
+                            convert_buffer = Board.squares.get(buffer)
+                            if convert_buffer not in Board.b_block_check:
+                                Board.b_block_check.append(convert_buffer)
                         Board.w_attacks.append(next_square + i)
                     on_board = Board.squares.get(next_square)
                     if on_board:
@@ -646,6 +704,12 @@ class BlackRook(Board):
                 for x in range(8):
                     next_square += i
                     if next_square == Board.w_king[0]:
+                        buffer = next_square
+                        while not buffer == position:
+                            buffer -= i
+                            convert_buffer = Board.squares.get(buffer)
+                            if convert_buffer not in Board.w_block_check:
+                                Board.w_block_check.append(convert_buffer)
                         Board.b_attacks.append(next_square + i)
                     on_board = Board.squares.get(next_square)
                     if on_board:
@@ -684,6 +748,12 @@ class WhiteBishop(Board):
                 for x in range(8):
                     next_square += i
                     if next_square == Board.b_king[0]:
+                        buffer = next_square
+                        while not buffer == position:
+                            buffer -= i
+                            convert_buffer = Board.squares.get(buffer)
+                            if convert_buffer not in Board.b_block_check:
+                                Board.b_block_check.append(convert_buffer)
                         Board.w_attacks.append(next_square + i)
                     on_board = Board.squares.get(next_square)
                     if on_board:
@@ -726,7 +796,8 @@ class BlackBishop(Board):
                         while not buffer == position:
                             buffer -= i
                             convert_buffer = Board.squares.get(buffer)
-                            Board.w_block_check.append(convert_buffer)
+                            if convert_buffer not in Board.w_block_check:
+                              Board.w_block_check.append(convert_buffer)
 
                         Board.b_attacks.append(next_square + i)
                     on_board = Board.squares.get(next_square)
@@ -766,6 +837,12 @@ class WhiteQueen(Board):
                 for x in range(8):
                     next_square += i
                     if next_square == Board.b_king[0]:
+                        buffer = next_square
+                        while not buffer == position:
+                            buffer -= i
+                            convert_buffer = Board.squares.get(buffer)
+                            if convert_buffer not in Board.b_block_check:
+                                Board.b_block_check.append(convert_buffer)
                         Board.w_attacks.append(next_square + i)
                     on_board = Board.squares.get(next_square)
                     if on_board:
@@ -798,6 +875,12 @@ class WhiteQueen(Board):
                 for x in range(8):
                     next_square += i
                     if next_square == Board.b_king[0]:
+                        buffer = next_square
+                        while not buffer == position:
+                            buffer -= i
+                            convert_buffer = Board.squares.get(buffer)
+                            if convert_buffer not in Board.b_block_check:
+                                Board.b_block_check.append(convert_buffer)
                         Board.w_attacks.append(next_square + i)
                     on_board = Board.squares.get(next_square)
                     if on_board:
@@ -836,6 +919,12 @@ class BlackQueen(Board):
                 for x in range(8):
                     next_square += i
                     if next_square == Board.w_king[0]:
+                        buffer = next_square
+                        while not buffer == position:
+                            buffer -= i
+                            convert_buffer = Board.squares.get(buffer)
+                            if convert_buffer not in Board.w_block_check:
+                                Board.w_block_check.append(convert_buffer)
                         Board.b_attacks.append(next_square + i)
                     on_board = Board.squares.get(next_square)
                     if on_board:
@@ -868,6 +957,12 @@ class BlackQueen(Board):
                 for x in range(8):
                     next_square += i
                     if next_square == Board.w_king[0]:
+                        buffer = next_square
+                        while not buffer == position:
+                            buffer -= i
+                            convert_buffer = Board.squares.get(buffer)
+                            if convert_buffer not in Board.w_block_check:
+                                Board.w_block_check.append(convert_buffer)
                         Board.b_attacks.append(next_square + i)
                     on_board = Board.squares.get(next_square)
                     if on_board:
@@ -918,6 +1013,11 @@ class White_Pawn(Board):
                 converted_move = (Board.squares.get(position)) + "-" + l_take_square
                 if converted_move not in Board.w_taking:
                     Board.w_taking.append(converted_move)
+            if Board.b_king[0] ==  (position + 13) or Board.b_king[0] ==  (position + 11):
+                buffer = Board.squares.get(position)
+                if buffer not in Board.b_block_check:
+                    Board.b_block_check.append(buffer)
+
             self.move = position + 12
             w_occup = Board.w_occupation.get(self.move)
             b_occup = Board.b_occupation.get(self.move)
@@ -974,6 +1074,10 @@ class Black_Pawn(Board):
                 converted_move = (Board.squares.get(position)) + "-" + l_take_square
                 if converted_move not in Board.b_taking:
                     Board.b_taking.append(converted_move)
+            if Board.w_king[0] ==  (position - 13) or Board.w_king[0] ==  (position - 11):
+                buffer = Board.squares.get(position)
+                if buffer not in Board.w_block_check:
+                    Board.w_block_check.append(buffer)
             w_occup = Board.w_occupation.get(self.move)
             b_occup = Board.b_occupation.get(self.move)
             if not w_occup and not b_occup:
@@ -1051,6 +1155,7 @@ def main_w_move(square_to_go):
 
 
 def b_main():
+    check = move.b_in_check()
     move.b_take()
 
     b_rook.rook_move()
@@ -1068,6 +1173,8 @@ def b_main():
     b_king.king_move()
     b_king.short_castling()
     b_king.long_castling()
+
+    move.b_delete_moves_if_check(check)
 
 
 def main_b_move(square_to_go):
