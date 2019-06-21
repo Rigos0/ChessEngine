@@ -258,6 +258,12 @@ class Move(Board):
         Board.b_block_check = []
         Board.w_attacks = []
 
+    def b_delete_pinned_pieces(self):
+        for i in Board.b_pawns_moves:
+            if i[0] + i[1] in Board.w_pins:
+                Board.b_pawns_moves.remove(i)
+
+
 
     def w_make_move(self, square_to_go):
         move = square_to_go
@@ -679,6 +685,19 @@ class WhiteRook(Board):
                                     Board.w_taking.append(move)
                                 if next_square not in Board.w_attacks:
                                     Board.w_attacks.append(next_square)
+
+                                pin_square_counter = next_square + i                    #pin black piece
+                                while pin_square_counter < 8:
+                                    b_occup_check = Board.b_occupation.get(pin_square_counter)
+                                    if b_occup_check:
+                                        if Board.b_king[0] == pin_square_counter:
+                                            Board.w_pins.append(on_board)
+                                            print(Board.w_pins)#on_board is converted current position
+                                        else:
+                                            break
+                                    else:
+                                        pin_square_counter += i
+
                                 break
                             else:
                                 if move not in Board.w_rooks_moves:
@@ -1156,6 +1175,7 @@ def main_w_move(square_to_go):
 
 def b_main():
     check = move.b_in_check()
+    move.b_delete_pinned_pieces()
     move.b_take()
 
     b_rook.rook_move()
