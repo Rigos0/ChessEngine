@@ -1,7 +1,6 @@
 import pygame
 from Board import *
 import ctypes
-import time
 
 pygame.init()
 
@@ -200,8 +199,9 @@ def WhiteMove(surface):
     previous_selected_square = []
     counter = 0
     create_occupation_lists()
-    timesleep = 0.1
     mouse_down = False
+    b_main()
+    w_main()
 
     while True:
         surface.fill((0, 0, 0))
@@ -213,7 +213,6 @@ def WhiteMove(surface):
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_down = True
-                timesleep = 0
                 x, y = pygame.mouse.get_pos()
                 selected_square = get_square(x, y)
                 previous_selected_square.append(selected_square)
@@ -233,9 +232,6 @@ def WhiteMove(surface):
             if event.type == pygame.VIDEORESIZE:
                 surface = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
 
-        if not mouse_down:
-            b_main()
-            w_main()
         w_get_squares(selected_square)
         blit_pawn()
         blit_bishop()
@@ -250,8 +246,6 @@ def WhiteMove(surface):
         blit_b_queen()
         blit_b_king()
 
-        time.sleep(timesleep)
-
         if blitdots:
             blit_dots()
         pygame.display.update()
@@ -264,8 +258,10 @@ def BlackMove(surface):
     previous_selected_square = []
     counter = 0
     create_occupation_lists()
-    timesleep = 0.1
     mouse_down = False
+
+    w_main()
+    b_main()
 
     while True:
         surface.fill((0, 0, 0))
@@ -279,7 +275,6 @@ def BlackMove(surface):
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_down = True
-                timesleep = 0
                 x, y = pygame.mouse.get_pos()
                 selected_square = get_square(x, y)
                 previous_selected_square.append(selected_square)
@@ -295,9 +290,6 @@ def BlackMove(surface):
 
                 blitdots = True
 
-        if not mouse_down:
-            w_main()
-            b_main()
         b_get_squares(selected_square)
         blit_pawn()
         blit_bishop()
@@ -311,8 +303,6 @@ def BlackMove(surface):
         blit_b_rook()
         blit_b_queen()
         blit_b_king()
-
-        time.sleep(timesleep)
 
         if blitdots:
             blit_dots()
