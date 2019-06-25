@@ -39,6 +39,8 @@ class Board:
         Board.b_block_check = []
         Board.w_pins = []
         Board.b_pins = []
+        Board.w_pinning_piece = []
+        Board.b_pinning_piece = []
         Board.the_game = []
 
         Board.squares = {
@@ -259,9 +261,103 @@ class Move(Board):
         Board.w_attacks = []
 
     def b_delete_pinned_pieces(self):
+        temporare_list = []
         for i in Board.b_pawns_moves:
-            if i[0] + i[1] in Board.w_pins:
-                Board.b_pawns_moves.remove(i)
+            if i[0] + i[1] not in Board.w_pins:
+                temporare_list.append(i)
+        for i in Board.b_pawns_moves:
+            if i[3] + i[4] in Board.w_pinning_piece:
+                temporare_list.append(i)
+        Board.b_pawns_moves = temporare_list
+        temporare_list = []
+        for i in Board.b_rooks_moves:
+            if i[0] + i[1] not in Board.w_pins:
+                temporare_list.append(i)
+        for i in Board.b_rooks_moves:
+            if i[3] + i[4] in Board.w_pinning_piece:
+                temporare_list.append(i)
+        Board.b_rooks_moves = temporare_list
+        temporare_list = []
+        for i in Board.b_bishops_moves:
+            if i[0] + i[1] not in Board.w_pins:
+                temporare_list.append(i)
+        for i in Board.b_bishops_moves:
+            if i[3] + i[4] in Board.w_pinning_piece:
+                temporare_list.append(i)
+        Board.b_bishops_moves = temporare_list
+        temporare_list = []
+        for i in Board.b_queen_moves:
+            if i[0] + i[1] not in Board.w_pins:
+                temporare_list.append(i)
+        for i in Board.b_queen_moves:
+            if i[3] + i[4] in Board.w_pinning_piece:
+                temporare_list.append(i)
+        Board.b_queen_moves = temporare_list
+        temporare_list = []
+        for i in Board.b_knights_moves:
+            if i[0] + i[1] not in Board.w_pins:
+                temporare_list.append(i)
+        Board.b_knights_moves = temporare_list
+        temporare_list = []
+        for i in Board.b_taking:
+            if i[0] + i[1] not in Board.w_pins:
+                temporare_list.append(i)
+        for i in Board.b_taking:
+            if i[3] + i[4] in Board.w_pinning_piece:
+                temporare_list.append(i)
+        Board.b_taking = temporare_list
+        Board.w_pins = []
+        Board.w_pinning_piece = []
+
+
+    def w_delete_pinned_pieces(self):
+        temporare_list = []
+        for i in Board.w_pawns_moves:
+            if i[0] + i[1] not in Board.b_pins:
+                temporare_list.append(i)
+        for i in Board.w_pawns_moves:
+            if i[3] + i[4] in Board.b_pinning_piece:
+                temporare_list.append(i)
+        Board.w_pawns_moves = temporare_list
+        temporare_list = []
+        for i in Board.w_rooks_moves:
+            if i[0] + i[1] not in Board.b_pins:
+                temporare_list.append(i)
+        for i in Board.w_rooks_moves:
+            if i[3] + i[4] in Board.b_pinning_piece:
+                temporare_list.append(i)
+        Board.w_rooks_moves = temporare_list
+        temporare_list = []
+        for i in Board.w_bishops_moves:
+            if i[0] + i[1] not in Board.b_pins:
+                temporare_list.append(i)
+            for i in Board.w_bishops_moves:
+                if i[3] + i[4] in Board.b_pinning_piece:
+                    temporare_list.append(i)
+        Board.w_bishops_moves = temporare_list
+        temporare_list = []
+        for i in Board.w_queen_moves:
+            if i[0] + i[1] not in Board.b_pins:
+                temporare_list.append(i)
+            for i in Board.w_queen_moves:
+                if i[3] + i[4] in Board.b_pinning_piece:
+                    temporare_list.append(i)
+        Board.w_queen_moves = temporare_list
+        temporare_list = []
+        for i in Board.w_knights_moves:
+            if i[0] + i[1] not in Board.b_pins:
+                temporare_list.append(i)
+        Board.w_knights_moves = temporare_list
+        temporare_list = []
+        for i in Board.w_taking:
+            if i[0] + i[1] not in Board.b_pins:
+                temporare_list.append(i)
+        for i in Board.w_taking:
+            if i[3] + i[4] in Board.b_pinning_piece:
+                temporare_list.append(i)
+        Board.w_taking = temporare_list
+        Board.b_pins = []
+        Board.b_pinning_piece = []
 
 
 
@@ -686,19 +782,26 @@ class WhiteRook(Board):
                                 if next_square not in Board.w_attacks:
                                     Board.w_attacks.append(next_square)
 
-                                pin_square_counter = next_square + i                    #pin black piece
-                                while pin_square_counter < 8:
+                                pin_square_counter = next_square + i   #pin black piece
+                                for x in range(8):
                                     b_occup_check = Board.b_occupation.get(pin_square_counter)
                                     if b_occup_check:
                                         if Board.b_king[0] == pin_square_counter:
-                                            Board.w_pins.append(on_board)
-                                            print(Board.w_pins)#on_board is converted current position
+                                            if on_board not in Board.w_pins:
+                                                Board.w_pins.append(on_board)      #on_board is converted current position
+                                                pos = position
+                                                for z in range(7):
+                                                    if pos not in Board.w_pinning_piece:
+                                                        Board.w_pinning_piece.append(Board.squares.get(pos))
+                                                    pos += i
+                                            break
                                         else:
                                             break
                                     else:
                                         pin_square_counter += i
-
+                                        pass
                                 break
+
                             else:
                                 if move not in Board.w_rooks_moves:
                                     Board.w_rooks_moves.append(move)
@@ -741,6 +844,25 @@ class BlackRook(Board):
                                     Board.b_taking.append(move)
                                 if next_square not in Board.b_attacks:
                                     Board.b_attacks.append(next_square)
+
+                                pin_square_counter = next_square + i  # pin black piece
+                                for x in range(8):
+                                    w_occup_check = Board.w_occupation.get(pin_square_counter)
+                                    if w_occup_check:
+                                        if Board.w_king[0] == pin_square_counter:
+                                            if on_board not in Board.b_pins:
+                                                Board.b_pins.append(on_board)  # on_board is converted current position
+                                                pos = position
+                                                for z in range(7):
+                                                    if pos not in Board.b_pinning_piece:
+                                                        Board.b_pinning_piece.append(Board.squares.get(pos))
+                                                    pos += i
+                                            break
+                                        else:
+                                            break
+                                    else:
+                                        pin_square_counter += i
+                                        pass
                                 break
                             else:
                                 if move not in Board.b_rooks_moves:
@@ -752,7 +874,6 @@ class BlackRook(Board):
                             break
                     else:
                         break
-
 
 class WhiteBishop(Board):
     def __init__(self):
@@ -785,6 +906,26 @@ class WhiteBishop(Board):
                                     Board.w_taking.append(move)
                                 if next_square not in Board.w_attacks:
                                     Board.w_attacks.append(next_square)
+
+                                pin_square_counter = next_square + i  # pin black piece
+                                for x in range(8):
+                                    b_occup_check = Board.b_occupation.get(pin_square_counter)
+                                    if b_occup_check:
+                                        if Board.b_king[0] == pin_square_counter:
+                                            if on_board not in Board.w_pins:
+                                                Board.w_pins.append(on_board)  # on_board is converted current position
+                                                pos = position
+                                                for z in range(7):
+                                                    if pos not in Board.w_pinning_piece:
+                                                        Board.w_pinning_piece.append(Board.squares.get(pos))
+                                                    pos += i
+                                            break
+                                        else:
+                                            break
+                                    else:
+                                        pin_square_counter += i
+                                        pass
+
                                 break
                             else:
                                 if move not in Board.w_bishops_moves:
@@ -816,8 +957,7 @@ class BlackBishop(Board):
                             buffer -= i
                             convert_buffer = Board.squares.get(buffer)
                             if convert_buffer not in Board.w_block_check:
-                              Board.w_block_check.append(convert_buffer)
-
+                                Board.w_block_check.append(convert_buffer)
                         Board.b_attacks.append(next_square + i)
                     on_board = Board.squares.get(next_square)
                     if on_board:
@@ -830,6 +970,25 @@ class BlackBishop(Board):
                                     Board.b_taking.append(move)
                                 if next_square not in Board.b_attacks:
                                     Board.b_attacks.append(next_square)
+
+                                pin_square_counter = next_square + i  # pin black piece
+                                for x in range(8):
+                                    w_occup_check = Board.w_occupation.get(pin_square_counter)
+                                    if w_occup_check:
+                                        if Board.w_king[0] == pin_square_counter:
+                                            if on_board not in Board.b_pins:
+                                                Board.b_pins.append(on_board)  # on_board is converted current position
+                                                pos = position
+                                                for z in range(7):
+                                                    if pos not in Board.b_pinning_piece:
+                                                        Board.b_pinning_piece.append(Board.squares.get(pos))
+                                                    pos += i
+                                            break
+                                        else:
+                                            break
+                                    else:
+                                        pin_square_counter += i
+                                        pass
                                 break
                             else:
                                 if move not in Board.b_bishops_moves:
@@ -874,6 +1033,25 @@ class WhiteQueen(Board):
                                     Board.w_taking.append(move)
                                 if next_square not in Board.w_attacks:
                                     Board.w_attacks.append(next_square)
+
+                                pin_square_counter = next_square + i  # pin black piece
+                                for x in range(8):
+                                    b_occup_check = Board.b_occupation.get(pin_square_counter)
+                                    if b_occup_check:
+                                        if Board.b_king[0] == pin_square_counter:
+                                            if on_board not in Board.w_pins:
+                                                Board.w_pins.append(on_board)  # on_board is converted current position
+                                                pos = position
+                                                for z in range(7):
+                                                    if pos not in Board.w_pinning_piece:
+                                                        Board.w_pinning_piece.append(Board.squares.get(pos))
+                                                    pos += i
+                                            break
+                                        else:
+                                            break
+                                    else:
+                                        pin_square_counter += i
+                                        pass
                                 break
                             else:
                                 if move not in Board.w_queen_moves:
@@ -912,6 +1090,25 @@ class WhiteQueen(Board):
                                     Board.w_taking.append(move)
                                 if next_square not in Board.w_attacks:
                                     Board.w_attacks.append(next_square)
+
+                                pin_square_counter = next_square + i   #pin black piece
+                                for x in range(8):
+                                    b_occup_check = Board.b_occupation.get(pin_square_counter)
+                                    if b_occup_check:
+                                        if Board.b_king[0] == pin_square_counter:
+                                            if on_board not in Board.w_pins:
+                                                Board.w_pins.append(on_board)          #on_board is converted current position
+                                                pos = position
+                                                for z in range(7):
+                                                    if pos not in Board.w_pinning_piece:
+                                                        Board.w_pinning_piece.append(Board.squares.get(pos))
+                                                    pos += i
+                                            break
+                                        else:
+                                            break
+                                    else:
+                                        pin_square_counter += i
+                                        pass
                                 break
                             else:
                                 if move not in Board.w_queen_moves:
@@ -956,6 +1153,25 @@ class BlackQueen(Board):
                                     Board.b_taking.append(move)
                                 if next_square not in Board.b_attacks:
                                     Board.b_attacks.append(next_square)
+
+                                pin_square_counter = next_square + i  # pin black piece
+                                for x in range(8):
+                                    w_occup_check = Board.w_occupation.get(pin_square_counter)
+                                    if w_occup_check:
+                                        if Board.w_king[0] == pin_square_counter:
+                                            if on_board not in Board.b_pins:
+                                                Board.b_pins.append(on_board)  # on_board is converted current position
+                                                pos = position
+                                                for z in range(7):
+                                                    if pos not in Board.b_pinning_piece:
+                                                        Board.b_pinning_piece.append(Board.squares.get(pos))
+                                                    pos += i
+                                            break
+                                        else:
+                                            break
+                                    else:
+                                        pin_square_counter += i
+                                        pass
                                 break
                             else:
                                 if move not in Board.b_queen_moves:
@@ -994,6 +1210,25 @@ class BlackQueen(Board):
                                     Board.b_taking.append(move)
                                 if next_square not in Board.b_attacks:
                                     Board.b_attacks.append(next_square)
+
+                                pin_square_counter = next_square + i  # pin black piece
+                                for x in range(8):
+                                    w_occup_check = Board.w_occupation.get(pin_square_counter)
+                                    if w_occup_check:
+                                        if Board.w_king[0] == pin_square_counter:
+                                            if on_board not in Board.b_pins:
+                                                Board.b_pins.append(on_board)  # on_board is converted current position
+                                                pos = position
+                                                for z in range(7):
+                                                    if pos not in Board.b_pinning_piece:
+                                                        Board.b_pinning_piece.append(Board.squares.get(pos))
+                                                    pos += i
+                                            break
+                                        else:
+                                            break
+                                    else:
+                                        pin_square_counter += i
+                                        pass
                                 break
                             else:
                                 if move not in Board.b_queen_moves:
@@ -1161,6 +1396,7 @@ def w_main():
     w_king.long_castling()
 
     move.w_delete_moves_if_check(check)
+    move.w_delete_pinned_pieces()
 
 
 def w_get_squares(selected_square):
@@ -1175,7 +1411,6 @@ def main_w_move(square_to_go):
 
 def b_main():
     check = move.b_in_check()
-    move.b_delete_pinned_pieces()
     move.b_take()
 
     b_rook.rook_move()
@@ -1195,6 +1430,7 @@ def b_main():
     b_king.long_castling()
 
     move.b_delete_moves_if_check(check)
+    move.b_delete_pinned_pieces()
 
 
 def main_b_move(square_to_go):
