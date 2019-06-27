@@ -1,45 +1,19 @@
-class Board():
-    def __init__(self):
-        self.w_bishops = [29, 32]
-        self.w_rooks = [27, 34]
-        self.w_knights = [28, 33]
-        self.w_king = [31]
-        self.w_queen = [30]
-        self.w_pawns = [39, 40, 41, 42, 43, 44, 45, 46]
-        self.b_bishops = [113, 116]
-        self.b_rooks = [111, 118]
-        self.b_knights = [112, 117]
-        self.b_king = [115]
-        self.b_queen = [114]
-        self.b_pawns = [99, 100, 101, 102, 103, 104, 105, 106]
-        self.w_bishops_moves = []
-        self.w_rooks_moves = []
-        self.w_knights_moves = []
-        self.w_king_moves = []
-        self.w_queen_moves = []
-        self.w_pawns_moves = []
-        self.w_taking = []
-        self.b_bishops_moves = []
-        self.b_rooks_moves = []
-        self.b_knights_moves = []
-        self.b_king_moves = []
-        self.b_queen_moves = []
-        self.b_pawns_moves = []
-        self.b_taking = []
-        self.w_occupation = []
-        self.b_occupation = []
-        self.w_attacks = []
-        self.b_attacks = []
-        self.w_enpassant = []
-        self.b_enpassant = []
-        self.w_block_check = []
-        self.b_block_check = []
-        self.w_pins = []
-        self.b_pins = []
-        self.w_pinning_piece = []
-        self.b_pinning_piece = []
-        self.the_game = []
-        self.squares = {
+class Board(object):
+    def __init__(self, squares, positions):
+        self.squares = squares
+        self.positions = positions
+
+    def occupation(self):
+        occupation = []
+        square_counter = 27
+        while square_counter < 119:
+            if square_counter in self.positions:
+                occupation.append(square_counter)
+            square_counter += 1
+        return occupation
+
+
+all_squares = {
             27: "a1",
             28: "b1",
             29: "c1",
@@ -106,63 +80,31 @@ class Board():
             118: "h8"
         }
 
-    def create_occupation_lists(self, white, black):
-        if white:
-            white_pieces = self.w_pawns + self.w_bishops + self.w_knights + self.w_rooks + self.w_king + self.w_queen
-            square_counter = 27
-            while square_counter < 119:
-                if square_counter in white_pieces:
-                    self.w_occupation.append(square_counter)
-                square_counter += 1
-        if black:
-            black_pieces = self.b_pawns + self.b_bishops + self.b_knights + self.b_rooks + self.b_king + self.b_queen
-            square_counter = 27
-            while square_counter < 119:
-                if square_counter in black_pieces:
-                    self.b_occupation.append(square_counter)
-                square_counter += 1
+w_bishops = [29, 32]
+w_rooks = [27, 34]
+w_knights = [28, 33]
+w_king = [31]
+w_queen = [30]
+w_pawns = [39, 40, 41, 42, 43, 44, 45, 46]
+b_bishops = [113, 116]
+b_rooks = [111, 118]
+b_knights = [112, 117]
+b_king = [115]
+b_queen = [114]
+b_pawns = [99, 100, 101, 102, 103, 104, 105, 106]
 
-class Move(Board):
-    def __init__(self, Board):
-        self.__init__(self, Board)
-        Move.dots = []
-        Move.b_dots = []
+w_positions = w_bishops + w_king + w_knights + w_pawns + w_queen + w_rooks
+b_positions = b_bishops + b_king + b_knights + b_pawns + b_queen + b_rooks
 
-    def w_delete_moves_if_check(self, check):
-        w_king_position = self.squares.get(self.w_king[0])
-        buffer_list = []
-        if check:
-            for i in self.w_pawns_moves:
-                if i[3] + i[4] in self.w_block_check:
-                    buffer_list.append(i)
-            self.w_pawns_moves = buffer_list
-            buffer_list = []
-            for i in self.w_queen_moves:
-                if i[3] + i[4] in self.w_block_check:
-                    buffer_list.append(i)
-            self.w_queen_moves = buffer_list
-            buffer_list = []
-            for i in self.w_knights_moves:
-                if i[3] + i[4] in self.w_block_check:
-                    buffer_list.append(i)
-            self.w_knights_moves = buffer_list
-            buffer_list = []
-            for i in self.w_bishops_moves:
-                if i[3] + i[4] in self.w_block_check:
-                    buffer_list.append(i)
-            self.w_bishops_moves = buffer_list
-            buffer_list = []
-            for i in self.w_rooks_moves:
-                if i[3] + i[4] in self.w_block_check:
-                    buffer_list.append(i)
-            self.w_rooks_moves = buffer_list
-            buffer_list = []
-            for i in self.w_taking:
-                if i[3] + i[4] in self.w_block_check:
-                    buffer_list.append(i)
-                if i[0] + i[1] == w_king_position:
-                    buffer_list.append(i)
+board = Board(all_squares, w_positions)
+occ = board.occupation()
+print(occ)
 
-            self.w_taking = buffer_list
-        self.w_block_check = []
-        self.b_attacks = []
+board = Board(all_squares, b_positions)
+occ = board.occupation()
+print(occ)
+
+
+
+
+
