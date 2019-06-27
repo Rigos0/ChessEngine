@@ -1,0 +1,313 @@
+import pygame
+from Search_Board import *
+import ctypes
+import time
+
+pygame.init()
+
+white = (255, 255, 255)
+black = (0, 0, 0)
+
+
+def get_square(x, y):
+    ranks = ["1", "2", "3", "4", "5", "6", "7", "8"]
+    files = ["a", "b", "c", "d", "e", "f", "g", "h"]
+    counter = 120
+    counter2 = -1
+    file = None
+    rank = None
+
+    for i in range(8):
+        if counter < y < counter + 80:
+            rank = ranks[counter2]
+            break
+        else:
+            counter += 80
+            counter2 -= 1
+    counter2 = 0
+    counter = 100
+    for i in range(8):
+        if counter < x < counter + 80:
+            file = files[counter2]
+            break
+        else:
+            counter += 80
+            counter2 += 1
+    if file and rank:
+        selected_square = file + rank
+        return selected_square
+
+
+def square_to_pos(square):
+    ranks = ["8", "7", "6", "5", "4", "3", "2", "1"]
+    files = ["a", "b", "c", "d", "e", "f", "g", "h"]
+
+    x_index = files.index(square[0])
+    x_pos = 100 + x_index * 80
+    y_index = ranks.index(square[1])
+    y_pos = 120 + y_index * 80
+    pos = (x_pos, y_pos)
+    return pos
+
+
+chess_board = pygame.image.load("chessboard.png")
+chess_board = pygame.transform.scale(chess_board, (640, 640))
+
+
+def chessboard():
+    surface.blit(chess_board, (100, 120))
+
+
+def blit_dots():
+    for square in Move.dots:
+        pos = square_to_pos(square)
+        pygame.draw.rect(surface, (235, 99, 31), [pos[0] , pos[1], 80, 80], 5)
+
+def blit_b_dots():
+    for square in Move.b_dots:
+        pos = square_to_pos(square)
+        pygame.draw.rect(surface, (235, 99, 31), [pos[0], pos[1], 80, 80], 5)
+# pygame.draw.circle(surface, red, pos, 7)
+
+
+knight = pygame.image.load("chessknight.png")
+knight = pygame.transform.scale(knight, (75, 75))
+pawn = pygame.image.load("whitepawn.png")
+pawn = pygame.transform.scale(pawn, (78, 78))
+bishop = pygame.image.load("whitebishop.png")
+bishop = pygame.transform.scale(bishop, (75, 75))
+rook = pygame.image.load("whiterook.png")
+rook = pygame.transform.scale(rook, (69, 69))
+queen = pygame.image.load("whitequeen.png")
+queen = pygame.transform.scale(queen, (76, 76))
+king = pygame.image.load("whiteking.png")
+king = pygame.transform.scale(king, (76, 76))
+
+
+def blit_knight():
+    for i in Board.w_knights:
+        square = Board.squares.get(i)
+        pos = square_to_pos(square)
+        pos = (pos[0] + 2, pos[1] + 3)
+        surface.blit(knight, pos)
+
+
+def blit_pawn():
+    for i in Board.w_pawns:
+        square = Board.squares.get(i)
+        pos = square_to_pos(square)
+        pos = (pos[0] - 1, pos[1] + 2)
+        surface.blit(pawn, pos)
+
+
+def blit_bishop():
+    for i in Board.w_bishops:
+        square = Board.squares.get(i)
+        pos = square_to_pos(square)
+        pos = (pos[0] + 2, pos[1] + 2)
+        surface.blit(bishop, pos)
+
+
+def blit_queen():
+    for i in Board.w_queen:
+        square = Board.squares.get(i)
+        pos = square_to_pos(square)
+        pos = (pos[0] +2, pos[1] +3)
+        surface.blit(queen, pos)
+
+
+def blit_rook():
+    for i in Board.w_rooks:
+        square = Board.squares.get(i)
+        pos = square_to_pos(square)
+        pos = (pos[0] + 6, pos[1]+8)
+        surface.blit(rook, pos)
+
+
+def blit_king():
+    for i in Board.w_king:
+        square = Board.squares.get(i)
+        pos = square_to_pos(square)
+        pos = (pos[0] + 2, pos[1] +2)
+        surface.blit(king, pos)
+
+blackknight = pygame.image.load("blackknight.png")
+blackknight = pygame.transform.scale(blackknight, (76, 76))
+blackpawn = pygame.image.load("blackpawn.png")
+blackpawn = pygame.transform.scale(blackpawn, (78, 78))
+blackbishop = pygame.image.load("blackbishop.png")
+blackbishop = pygame.transform.scale(blackbishop, (75, 75))
+blackrook = pygame.image.load("blackrook.png")
+blackrook = pygame.transform.scale(blackrook, (75, 75))
+blackqueen = pygame.image.load("blackqueen.png")
+blackqueen = pygame.transform.scale(blackqueen, (76, 76))
+blackking = pygame.image.load("blackking.png")
+blackking = pygame.transform.scale(blackking, (76, 76))
+
+
+def blit_b_pawn():
+    for i in Board.b_pawns:
+        square = Board.squares.get(i)
+        pos = square_to_pos(square)
+        pos = (pos[0] -1, pos[1] +2)
+        surface.blit(blackpawn, pos)
+
+
+def blit_b_bishop():
+    for i in Board.b_bishops:
+        square = Board.squares.get(i)
+        pos = square_to_pos(square)
+        pos = (pos[0] +2, pos[1] +2)
+        surface.blit(blackbishop, pos)
+
+
+def blit_b_queen():
+    for i in Board.b_queen:
+        square = Board.squares.get(i)
+        pos = square_to_pos(square)
+        pos = (pos[0] + 2, pos[1] + 3)
+        surface.blit(blackqueen, pos)
+
+
+def blit_b_rook():
+    for i in Board.b_rooks:
+        square = Board.squares.get(i)
+        pos = square_to_pos(square)
+        pos = (pos[0] + 2, pos[1]+4)
+        surface.blit(blackrook, pos)
+
+
+def blit_b_king():
+    for i in Board.b_king:
+        square = Board.squares.get(i)
+        pos = square_to_pos(square)
+        pos = (pos[0] + 2, pos[1] +2)
+        surface.blit(blackking, pos)
+
+
+def blit_b_knight():
+    for i in Board.b_knights:
+        square = Board.squares.get(i)
+        pos = square_to_pos(square)
+        pos = (pos[0] , pos[1] + 2)
+        surface.blit(blackknight, pos)
+
+
+def WhiteMove(surface):
+    blitdots = False
+    global selected_square
+    selected_square = str
+    previous_selected_square = []
+    counter = 0
+    create_occupation_lists()
+    timesleep = 0.1
+    mouse_down = False
+
+    while True:
+        surface.fill((0, 0, 0))
+        chessboard()  # this is just to draw a board
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_down = True
+                timesleep = 0
+                x, y = pygame.mouse.get_pos()
+                selected_square = get_square(x, y)
+                previous_selected_square.append(selected_square)
+                counter += 1
+
+                for i in Move.dots:
+                    if i == selected_square:
+                        global square_to_go
+                        square_to_go = previous_selected_square[counter - 2] + "-" + i
+                        main_w_move(square_to_go)
+                        Board.w_attacks = []
+                        mouse_down = False
+                        return
+
+                blitdots = True
+
+            if event.type == pygame.VIDEORESIZE:
+                surface = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
+
+        if not mouse_down:
+            b_main()
+            w_main()
+        w_get_squares(selected_square)
+        blit_pawn()
+        blit_bishop()
+        blit_knight()
+        blit_rook()
+        blit_queen()
+        blit_king()
+        blit_b_knight()
+        blit_b_pawn()
+        blit_b_bishop()
+        blit_b_rook()
+        blit_b_queen()
+        blit_b_king()
+
+        time.sleep(timesleep)
+
+        if blitdots:
+            blit_dots()
+        pygame.display.update()
+
+
+def BlackMove(surface):
+    blitdots = False
+    global selected_square
+    selected_square = str
+    previous_selected_square = []
+    counter = 0
+    create_occupation_lists()
+
+    surface.fill((0, 0, 0))
+    chessboard()  # this is just to draw a board
+
+
+    x, y = pygame.mouse.get_pos()
+    selected_square = get_square(x, y)
+    previous_selected_square.append(selected_square)
+    counter += 1
+
+    w_main()
+    b_main()
+
+    main_b_move()
+    mouse_down = False
+    blitdots = True
+
+    b_get_squares(selected_square)
+    blit_pawn()
+    blit_bishop()
+    blit_knight()
+    blit_rook()
+    blit_queen()
+    blit_king()
+    blit_b_knight()
+    blit_b_pawn()
+    blit_b_bishop()
+    blit_b_rook()
+    blit_b_queen()
+    blit_b_king()
+
+
+    if blitdots:
+        blit_dots()
+    pygame.display.update()
+
+screensize = pygame.display.Info()
+surface = pygame.display.set_mode((screensize.current_h, screensize.current_w), pygame.RESIZABLE)
+user32 = ctypes.WinDLL('user32')
+
+SW_MAXIMISE = 3
+
+hWnd = user32.GetForegroundWindow()
+user32.ShowWindow(hWnd, SW_MAXIMISE)
+while True:
+    WhiteMove(surface)
+    BlackMove(surface)
