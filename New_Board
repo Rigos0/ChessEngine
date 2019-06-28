@@ -1,9 +1,108 @@
 class Board(object):
-    def __init__(self, squares, positions):
-        self.squares = squares
-        self.positions = positions
+    squares = {
+        27: "a1",
+        28: "b1",
+        29: "c1",
+        30: "d1",
+        31: "e1",
+        32: "f1",
+        33: "g1",
+        34: "h1",
+        39: "a2",
+        40: "b2",
+        41: "c2",
+        42: "d2",
+        43: "e2",
+        44: "f2",
+        45: "g2",
+        46: "h2",
+        51: "a3",
+        52: "b3",
+        53: "c3",
+        54: "d3",
+        55: "e3",
+        56: "f3",
+        57: "g3",
+        58: "h3",
+        63: "a4",
+        64: "b4",
+        65: "c4",
+        66: "d4",
+        67: "e4",
+        68: "f4",
+        69: "g4",
+        70: "h4",
+        75: "a5",
+        76: "b5",
+        77: "c5",
+        78: "d5",
+        79: "e5",
+        80: "f5",
+        81: "g5",
+        82: "h5",
+        87: "a6",
+        88: "b6",
+        89: "c6",
+        90: "d6",
+        91: "e6",
+        92: "f6",
+        93: "g6",
+        94: "h6",
+        99: "a7",
+        100: "b7",
+        101: "c7",
+        102: "d7",
+        103: "e7",
+        104: "f7",
+        105: "g7",
+        106: "h7",
+        111: "a8",
+        112: "b8",
+        113: "c8",
+        114: "d8",
+        115: "e8",
+        116: "f8",
+        117: "g8",
+        118: "h8"
+    }
+
+
+    def w_get_occupation(self, square):
+        none_true = self.squares.get(square)
+        return none_true
+
+class WhitePieces(Board):
+    def __init__(self):
+        self.w_bishops = [29, 32]
+        self.w_rooks = [27, 34]
+        self.w_knights = [28, 33]
+        self.w_king = [31]
+        self.w_queen = [30]
+        self.w_pawns = [39, 40, 41, 42, 43, 44, 45, 46]
+
+
+class BlackPieces(Board):
+    def __init__(self):
+        self.b_bishops = [113, 116]
+        self.b_rooks = [111, 118]
+        self.b_knights = [112, 117]
+        self.b_king = [115]
+        self.b_queen = [114]
+        self.b_pawns = [99, 100, 101, 102, 103, 104, 105, 106]
+
+
+class Occupation(WhitePieces, BlackPieces):
+    def __init__(self, white_or_black):
+        WhitePieces.__init__(self)
+        BlackPieces.__init__(self)
+        self.positions = list
+        self.w_or_b = white_or_black
 
     def occupation(self):
+        if self.w_or_b == "w":
+            self.positions = self.w_bishops + self.w_rooks + self.w_knights + self.w_king + self.w_queen + self.w_pawns
+        if self.w_or_b == "b":
+            self.positions = self.b_bishops + self.b_rooks + self.b_knights + self.b_king + self.b_queen + self.b_pawns
         occupation = []
         square_counter = 27
         while square_counter < 119:
@@ -12,97 +111,116 @@ class Board(object):
             square_counter += 1
         return occupation
 
+board_instance = Board()
+w_pieces = WhitePieces()
+b_pieces = BlackPieces()
+w_occupied = Occupation("w")
+b_occupied = Occupation("b")
+w_occupation = w_occupied.occupation()
+b_occupation = b_occupied.occupation()
 
-all_squares = {
-            27: "a1",
-            28: "b1",
-            29: "c1",
-            30: "d1",
-            31: "e1",
-            32: "f1",
-            33: "g1",
-            34: "h1",
-            39: "a2",
-            40: "b2",
-            41: "c2",
-            42: "d2",
-            43: "e2",
-            44: "f2",
-            45: "g2",
-            46: "h2",
-            51: "a3",
-            52: "b3",
-            53: "c3",
-            54: "d3",
-            55: "e3",
-            56: "f3",
-            57: "g3",
-            58: "h3",
-            63: "a4",
-            64: "b4",
-            65: "c4",
-            66: "d4",
-            67: "e4",
-            68: "f4",
-            69: "g4",
-            70: "h4",
-            75: "a5",
-            76: "b5",
-            77: "c5",
-            78: "d5",
-            79: "e5",
-            80: "f5",
-            81: "g5",
-            82: "h5",
-            87: "a6",
-            88: "b6",
-            89: "c6",
-            90: "d6",
-            91: "e6",
-            92: "f6",
-            93: "g6",
-            94: "h6",
-            99: "a7",
-            100: "b7",
-            101: "c7",
-            102: "d7",
-            103: "e7",
-            104: "f7",
-            105: "g7",
-            106: "h7",
-            111: "a8",
-            112: "b8",
-            113: "c8",
-            114: "d8",
-            115: "e8",
-            116: "f8",
-            117: "g8",
-            118: "h8"
-        }
+class LongRangePieces(Board):
+    def __init__(self, w_occup, b_occup, piece_pos, direction, board):
+        Board.__init__(self)
+        self.w_occupation = w_occupied
+        self.b_occupation = b_occupied
+        self.piece_position = piece_pos
+        self.direction = direction
+        self.squares = board.squares
 
-w_bishops = [29, 32]
-w_rooks = [27, 34]
-w_knights = [28, 33]
-w_king = [31]
-w_queen = [30]
-w_pawns = [39, 40, 41, 42, 43, 44, 45, 46]
-b_bishops = [113, 116]
-b_rooks = [111, 118]
-b_knights = [112, 117]
-b_king = [115]
-b_queen = [114]
-b_pawns = [99, 100, 101, 102, 103, 104, 105, 106]
+    def create_moves(self):
+        for x in self.direction:
+            for i in self.piece_position:
+                next_square = i + x
+                on_board = super(LongRangePieces, self).w_get_occupation(next_square)
+                if on_board:
+                    next_square += x
+                    print(next_square)
 
-w_positions = w_bishops + w_king + w_knights + w_pawns + w_queen + w_rooks
-b_positions = b_bishops + b_king + b_knights + b_pawns + b_queen + b_rooks
 
-board = Board(all_squares, w_positions)
-occ = board.occupation()
-print(occ)
 
-board = Board(all_squares, b_positions)
-occ = board.occupation()
-print(occ)
+
+
+
+
+
+rook_directions = [1, -1, 12, -12]
+w_rook = LongRangePieces(w_occupation, b_occupation, w_pieces.w_rooks, rook_directions, board_instance)
+w_rook.create_moves()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# class LongPieces(Board):
+#     def __init__(self, current_positions, w_occupied, b_occupied, directions, board):
+#         super().__init__(self.positions, self.squares)
+#         self.current_positions = current_positions
+#         self.squares = self.squares
+#         self.w_occupation = w_occupied
+#         self.b_occupation = b_occupied
+#         self.directions = directions
+#
+#     def create_list_of_moves(self):
+#         for i in self.current_positions:
+#             for x in self.directions:
+#                 next_square = i + x
+
+
+
+
+
+
+
+
+
+
+# w_bishops = [29, 32]
+# w_rooks = [27, 34]
+# w_knights = [28, 33]
+# w_king = [31]
+# w_queen = [30]
+# w_pawns = [39, 40, 41, 42, 43, 44, 45, 46]
+# b_bishops = [113, 116]
+# b_rooks = [111, 118]
+# b_knights = [112, 117]
+# b_king = [115]
+# b_queen = [114]
+# b_pawns = [99, 100, 101, 102, 103, 104, 105, 106]
+#
+#
+# list_squares = [27, 28, 29, 30]
+# w_positions = w_bishops + w_king + w_knights + w_pawns + w_queen + w_rooks
+# b_positions = b_bishops + b_king + b_knights + b_pawns + b_queen + b_rooks
+#
+# w_occup = Occupation(w_positions)
+# b_occup = Occupation(b_positions)
+#
+#
+# w_occupation = w_occup.occupation()
+# b_occupation = b_occup.occupation()
+#
+#
+# rook_directions = [1, -1, 12, -12]
+#
+# rook = LongPieces(w_rooks, w_occupation, b_occupation, rook_directions, w_board)
+# w_rooks_moves = rook.create_list_of_moves()
+# print(w_rooks_moves)
+
 
 
 
