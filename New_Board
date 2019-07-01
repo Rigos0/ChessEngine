@@ -122,31 +122,32 @@ b_occupation = b_occupied.occupation()
 class LongRangePieces(Board):
     def __init__(self, w_occup, b_occup, piece_pos, direction, board):
         Board.__init__(self)
-        self.w_occupation = w_occupied
-        self.b_occupation = b_occupied
+        self.w_occupation = w_occup
+        self.b_occupation = b_occup
         self.piece_position = piece_pos
         self.direction = direction
         self.squares = board.squares
 
     def create_moves(self):
+        list_of_moves = []
         for x in self.direction:
             for i in self.piece_position:
-                next_square = i + x
-                on_board = super(LongRangePieces, self).w_get_occupation(next_square)
-                if on_board:
+                next_square = i
+                for d in range(8):
                     next_square += x
-                    print(next_square)
-
-
-
-
-
-
+                    on_board = super(LongRangePieces, self).w_get_occupation(next_square)
+                    if on_board:
+                        list_of_moves.append(str(i)+str(next_square))
+                    else:
+                        break
+        return list_of_moves
 
 
 rook_directions = [1, -1, 12, -12]
 w_rook = LongRangePieces(w_occupation, b_occupation, w_pieces.w_rooks, rook_directions, board_instance)
-w_rook.create_moves()
+w_rooks_moves = w_rook.create_moves()
+print(w_rooks_moves)
+print(len(w_rooks_moves))
 
 
 
