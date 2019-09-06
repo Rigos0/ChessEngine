@@ -88,6 +88,21 @@ class WhitePieces(Board):
                     x[counter] = int(input("insert a new move: "))
                 counter += 1
 
+    @staticmethod
+    def create_moves():
+        w_knight = Knights("white")
+        w_knights_moves = w_knight.create_moves()
+        w_rook = LongRangePieces("rook", "white")
+        w_rooks_moves = w_rook.create_moves()
+        w_bishop = LongRangePieces("bishop", "white")
+        w_bishops_moves = w_bishop.create_moves()
+        w_queen = LongRangePieces("queen", "white")
+        w_queen_moves = w_queen.create_moves()
+        w_moves = {**w_bishops_moves, **w_rooks_moves, **w_queen_moves, **w_knights_moves}
+        print(w_moves)
+        select_square = int(input("make a move: "))
+        w_pieces.move_a_piece(select_square)
+
 
 class BlackPieces(Board):
     def __init__(self):
@@ -107,18 +122,31 @@ class BlackPieces(Board):
                     x[counter] = int(input("insert a new move: "))
                 counter += 1
 
+    @staticmethod
+    def create_moves():
+        b_knight = Knights("black")
+        b_knights_moves = b_knight.create_moves()
+        b_rook = LongRangePieces("rook", "black")
+        b_rooks_moves = b_rook.create_moves()
+        b_bishop = LongRangePieces("bishop", "black")
+        b_bishops_moves = b_bishop.create_moves()
+        b_queen = LongRangePieces("queen", "black")
+        b_queen_moves = b_queen.create_moves()
+        b_moves = {**b_bishops_moves, **b_rooks_moves, **b_queen_moves, **b_knights_moves}
+        print(b_moves)
+        select_square = int(input("make a move: "))
+        b_pieces.move_a_piece(select_square)
 
-class Occupation(WhitePieces, BlackPieces):
+
+class Occupation:
     def __init__(self):
-        WhitePieces.__init__(self)
-        BlackPieces.__init__(self)
         self.positions = []
 
     def get_occupation(self, white_or_black):
         if white_or_black == "w":
-            self.positions = self.w_bishops + self.w_rooks + self.w_knights + self.w_king + self.w_queen + self.w_pawns
+            self.positions = w_pieces.w_bishops + w_pieces.w_rooks + w_pieces.w_knights + w_pieces.w_king + w_pieces.w_queen + w_pieces.w_pawns
         if white_or_black == "b":
-            self.positions = self.b_bishops + self.b_rooks + self.b_knights + self.b_king + self.b_queen + self.b_pawns
+            self.positions = b_pieces.b_bishops + b_pieces.b_rooks + b_pieces.b_knights + b_pieces.b_king + b_pieces.b_queen + b_pieces.b_pawns
         occupation_list = []
         square_counter = 27
         while square_counter < 119:
@@ -142,10 +170,12 @@ class LongRangePieces(Board):
             self.friendly_occup = self.w_occupation
             self.enemy_occup = self.b_occupation
             self.white = True
+            self.black = False
         else:
             self.friendly_occup = self.b_occupation
             self.enemy_occup = self.w_occupation
             self.black = True
+            self.white = False
         if piece_type == "rook":
             self.directions = [1, -1, 12, -12]
             if self.white:
@@ -220,17 +250,7 @@ class Knights(Board):
         return moves_dict
 
 
-
 while True:
-    w_knight = Knights("white")
-    w_rook = LongRangePieces("rook", "white")
-    w_bishop = LongRangePieces("bishop", "white")
-    w_queen = LongRangePieces("queen", "white")
-    w_knights_moves = w_knight.create_moves()
-    w_rooks_moves = w_rook.create_moves()
-    w_bishops_moves = w_bishop.create_moves()
-    w_queen_moves = w_queen.create_moves()
-    w_moves = {**w_bishops_moves, **w_rooks_moves, **w_queen_moves, **w_knights_moves}
-    print(w_moves)
-    selected_square = int(input("make a move: "))
-    w_pieces.move_a_piece(selected_square)
+    w_pieces.create_moves()
+    b_pieces.create_moves()
+
