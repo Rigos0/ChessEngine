@@ -72,36 +72,87 @@ class Board:
 
 class WhitePieces(Board):
     def __init__(self):
-        self.w_bishops = [29, 32]
-        self.w_rooks = [27, 34]
+        self.w_bishops = [29, 32, 67]
+        self.w_rooks = [27, 34, 55]
         self.w_knights = [28, 33]
         self.w_king = [31]
         self.w_queen = [30]
         self.w_pawns = [39, 40, 41, 42, 43, 44, 45, 46]
+        self.w_moves = {}
+        self.w_moves_list = []
+        self.w_lists = [self.w_knights, self.w_pawns, self.w_queen, self.w_bishops, self.w_rooks, self.w_king]
 
-    def move_a_piece(self, selected_square):
-        w_lists = [self.w_knights, self.w_pawns, self.w_queen, self.w_bishops, self.w_rooks]
-        for x in w_lists:
+    def move_a_piece(self, notation):
+        for x in self.w_lists:
             counter = 0
             for z in x:
-                if z == selected_square:
-                    x[counter] = int(input("insert a new move: "))
+                if z == notation[0]:
+                    x[counter] = notation[1]
                 counter += 1
 
-    @staticmethod
-    def create_moves():
+    def create_moves_dict(self):
+        w_pawn = Pawns("white")
         w_knight = Knights("white")
-        w_knights_moves = w_knight.create_moves()
         w_rook = LongRangePieces("rook", "white")
-        w_rooks_moves = w_rook.create_moves()
         w_bishop = LongRangePieces("bishop", "white")
-        w_bishops_moves = w_bishop.create_moves()
         w_queen = LongRangePieces("queen", "white")
+        w_king = King("white")
+        w_knights_moves = w_knight.create_moves()
+        w_rooks_moves = w_rook.create_moves()
+        w_bishops_moves = w_bishop.create_moves()
         w_queen_moves = w_queen.create_moves()
-        w_moves = {**w_bishops_moves, **w_rooks_moves, **w_queen_moves, **w_knights_moves}
-        print(w_moves)
-        select_square = int(input("make a move: "))
-        w_pieces.move_a_piece(select_square)
+        w_pawns_moves = w_pawn.create_basic_moves()
+        w_king_moves = w_king.create_moves()
+        self.w_moves = {**w_bishops_moves, **w_rooks_moves, **w_queen_moves, **w_knights_moves, **w_pawns_moves,
+                        **w_king_moves}
+        return self.w_moves
+
+    def delete_taken_pieces(self):
+        b_pieces_counter = -1
+        self.b_lists = [b_pieces.b_bishops, b_pieces.b_knights, b_pieces.b_pawns, b_pieces.b_queen, b_pieces.b_rooks]
+        for b_piece_list in self.b_lists:
+            b_pieces_counter += 1            
+            for b_position in b_piece_list:
+                for w_piece_list in self.w_lists:
+                    for w_position in w_piece_list:
+                        if w_position == b_position:
+                            b_piece_list.remove(b_position)
+                            # This line is for the function that checks whether is certain move legal.
+                            # If we delete a piece during the legal check, we have to revive it afterwards.
+                            return [b_pieces_counter, b_position]
+
+    def delete_move_if_check(self):
+        # create a nested list containing lists in the form [selected piece, next square]
+        nested_list_of_moves = []
+        delete_these_moves = []
+        for x, y in self.w_moves.items():
+            for i in y:
+                piece_square_list = [x, i]
+                nested_list_of_moves.append(piece_square_list)
+        # try to make the move and generate black's threats, if one of the black's pieces attacks our king, then delete
+        # the move from the list of possible moves
+        for move in nested_list_of_moves:
+            w_pieces.move_a_piece(move)
+            # try to delete a piece if we take one, this variable stores information about the piece so we can return it
+            # afterwards
+            deleted_piece = w_pieces.delete_taken_pieces()
+            b_attacks = b_pieces.create_moves_dict()
+            for lists in b_attacks.values():
+                for square in lists:
+                    if square == self.w_king[0]:
+                        delete_these_moves.append(move)
+            if deleted_piece:
+                self.b_lists[deleted_piece[0]].append(deleted_piece[1])
+            # we tried to execute the move to check if our king would be hanging, therefore we have to take the move
+            # back
+            reverse_move = [move[1], move[0]]
+            w_pieces.move_a_piece(reverse_move)
+        # it is not possible to delete an item directly in the process because it would mess up the 'for' loop
+        for t in delete_these_moves:
+            for u in nested_list_of_moves:
+                if t == u:
+                    nested_list_of_moves.remove(u)
+        print(nested_list_of_moves)     
 
 
 class BlackPieces(Board):
@@ -111,42 +162,84 @@ class BlackPieces(Board):
         self.b_knights = [112, 117]
         self.b_king = [115]
         self.b_queen = [114]
-        self.b_pawns = [99, 100, 101, 102, 103, 104, 105, 106]
+        self.b_pawns = [99, 100, 101, 102, 105, 106]
+        self.b_lists = [self.b_knights, self.b_pawns, self.b_queen, self.b_bishops, self.b_rooks, self.b_king]
+        self.b_moves = {}
 
-    def move_a_piece(self, selected_square):
-        b_lists = [self.b_knights, self.b_pawns, self.b_queen, self.b_bishops, self.b_rooks]
-        for x in b_lists:
+    def move_a_piece(self, notation):
+        for x in self.b_lists:
             counter = 0
             for z in x:
-                if z == selected_square:
-                    x[counter] = int(input("insert a new move: "))
+                if z == notation[0]:           
+                    x[counter] = notation[1]
                 counter += 1
 
-    @staticmethod
-    def create_moves():
+    def create_moves_dict(self):
         b_knight = Knights("black")
-        b_knights_moves = b_knight.create_moves()
         b_rook = LongRangePieces("rook", "black")
-        b_rooks_moves = b_rook.create_moves()
         b_bishop = LongRangePieces("bishop", "black")
-        b_bishops_moves = b_bishop.create_moves()
         b_queen = LongRangePieces("queen", "black")
+        b_pawn = Pawns("black")
+        b_king = King("black")
+        b_knights_moves = b_knight.create_moves()
+        b_rooks_moves = b_rook.create_moves()
+        b_bishops_moves = b_bishop.create_moves()
         b_queen_moves = b_queen.create_moves()
-        b_moves = {**b_bishops_moves, **b_rooks_moves, **b_queen_moves, **b_knights_moves}
-        print(b_moves)
-        select_square = int(input("make a move: "))
-        b_pieces.move_a_piece(select_square)
+        b_pawns_moves = b_pawn.create_basic_moves()
+        b_king_moves = b_king.create_moves()
+        self.b_moves = {**b_bishops_moves, **b_rooks_moves, 
+                        **b_queen_moves, **b_knights_moves, **b_pawns_moves, **b_king_moves}
+        return self.b_moves
 
+    def delete_taken_pieces(self):
+        w_pieces_counter = - 1
+        self.w_lists = [w_pieces.w_bishops, w_pieces.w_knights, w_pieces.w_pawns, w_pieces.w_queen, w_pieces.w_rooks]
+        for w_piece_list in self.w_lists:
+            w_pieces_counter += 1
+            for w_position in w_piece_list:
+                for b_piece_list in self.b_lists:
+                    for b_position in b_piece_list:
+                        if b_position == w_position:
+                            w_piece_list.remove(w_position)
+                            return [w_pieces_counter, b_position]
 
+    def delete_move_if_check(self):
+        nested_list_of_moves = []
+        delete_these_moves = []
+        for x, y in self.b_moves.items():
+            for i in y:
+                piece_square_list = [x, i]
+                nested_list_of_moves.append(piece_square_list)
+        for move in nested_list_of_moves:
+            b_pieces.move_a_piece(move)
+            deleted_piece = b_pieces.delete_taken_pieces()
+            w_attacks = w_pieces.create_moves_dict()
+            for lists in w_attacks.values():
+                for square in lists:
+                    if square == self.b_king[0]:
+                        delete_these_moves.append(move)
+            if deleted_piece:                                             
+                self.w_lists[deleted_piece[0]].append(deleted_piece[1])
+            reverse_move = [move[1], move[0]]
+            b_pieces.move_a_piece(reverse_move)
+        for t in delete_these_moves:
+            for u in nested_list_of_moves:
+                if t == u:
+                    nested_list_of_moves.remove(u)
+        print(nested_list_of_moves)
+
+                                                                                                                              
 class Occupation:
     def __init__(self):
         self.positions = []
 
     def get_occupation(self, white_or_black):
         if white_or_black == "w":
-            self.positions = w_pieces.w_bishops + w_pieces.w_rooks + w_pieces.w_knights + w_pieces.w_king + w_pieces.w_queen + w_pieces.w_pawns
+            self.positions = w_pieces.w_bishops + w_pieces.w_rooks + w_pieces.w_knights \
+                             + w_pieces.w_king + w_pieces.w_queen + w_pieces.w_pawns
         if white_or_black == "b":
-            self.positions = b_pieces.b_bishops + b_pieces.b_rooks + b_pieces.b_knights + b_pieces.b_king + b_pieces.b_queen + b_pieces.b_pawns
+            self.positions = b_pieces.b_bishops + b_pieces.b_rooks + b_pieces.b_knights \
+                             + b_pieces.b_king + b_pieces.b_queen + b_pieces.b_pawns
         occupation_list = []
         square_counter = 27
         while square_counter < 119:
@@ -159,6 +252,7 @@ class Occupation:
 w_pieces = WhitePieces()
 b_pieces = BlackPieces()
 occupation = Occupation()
+board = Board
 
 
 class LongRangePieces(Board):
@@ -195,14 +289,15 @@ class LongRangePieces(Board):
             else:
                 self.piece_position = b_pieces.b_queen
 
-
     def create_moves(self):
         moves_dict = {}
-        board = Board
+        # loop through the list with all pieces
         for i in self.piece_position:
             list_of_moves = []
+            # loop through possible directions
             for x in self.directions:
                 next_square = i
+                # while not end of the board or a piece on the square, continue
                 while True:
                     next_square += x
                     on_board = board.square_on_board(self, next_square)
@@ -219,6 +314,7 @@ class LongRangePieces(Board):
             moves_dict[i] = list_of_moves
         return moves_dict
 
+
 class Knights(Board):
     def __init__(self, side_to_move):
         Board.__init__(self)
@@ -228,17 +324,88 @@ class Knights(Board):
             self.friendly_occup = self.w_occupation
             self.enemy_occup = self.b_occupation
             self.piece_position = w_pieces.w_knights
-            self.white = True
         else:
             self.friendly_occup = self.b_occupation
             self.enemy_occup = self.w_occupation
             self.piece_position = b_pieces.b_knights
-            self.black = True
         self.directions = [25, -25, 23, -23, 14, -14, 10, -10]
 
     def create_moves(self):
         moves_dict = {}
-        board = Board
+        for i in self.piece_position:
+            list_of_moves = []
+            for x in self.directions:
+                next_square = i + x
+                on_board = board.square_on_board(self, next_square)
+                if on_board and (next_square not in self.friendly_occup):
+                    list_of_moves.append(next_square)
+            moves_dict[i] = list_of_moves
+        return moves_dict
+
+
+class Pawns(Board):
+    def __init__(self, side_to_move):
+        Board.__init__(self)
+        self.w_occupation = occupation.get_occupation("w")
+        self.b_occupation = occupation.get_occupation("b")
+        if side_to_move == "white":
+            self.friendly_occup = self.w_occupation
+            self.enemy_occup = self.b_occupation
+            self.piece_position = w_pieces.w_pawns
+            self.take_right = 13
+            self.take_left = 11
+            self.forward = 12
+            self.double_move = 24
+            self.first_row = [39, 40, 41, 42, 43, 44, 45, 46]
+        else:
+            self.friendly_occup = self.b_occupation
+            self.enemy_occup = self.w_occupation
+            self.piece_position = b_pieces.b_pawns
+            self.take_right = -13
+            self.take_left = -11
+            self.forward = -12
+            self.double_move = -24
+            self.first_row = [99, 100, 101, 102, 103, 104, 105, 106]
+
+    def create_basic_moves(self):
+        moves_dict = {}
+        list_of_moves = []
+        for i in self.piece_position:
+            next_square = i + self.forward
+            on_board = board.square_on_board(self, next_square)
+            if on_board and (next_square not in self.friendly_occup and next_square not in self.enemy_occup):
+                list_of_moves.append(next_square)
+            # if pawns are on second row, append double moves
+            if i in self.first_row and (i + self.double_move) not in self.friendly_occup and (
+                    i + self.double_move) not in self.enemy_occup:
+                list_of_moves.append(i + self.double_move)
+            # append taking
+            if i + self.take_right in self.enemy_occup:
+                list_of_moves.append(i + self.take_right)
+            if i + self.take_left in self.enemy_occup:
+                list_of_moves.append(i + self.take_left)
+            moves_dict[i] = list_of_moves
+            list_of_moves = []
+        return moves_dict
+
+
+class King(Board):
+    def __init__(self, side_to_move):
+        Board.__init__(self)
+        self.w_occupation = occupation.get_occupation("w")
+        self.b_occupation = occupation.get_occupation("b")
+        if side_to_move == "white":
+            self.friendly_occup = self.w_occupation
+            self.enemy_occup = self.b_occupation
+            self.piece_position = w_pieces.w_king
+        else:
+            self.friendly_occup = self.b_occupation
+            self.enemy_occup = self.w_occupation
+            self.piece_position = b_pieces.b_king
+        self.directions = [12, -12, 13, -13, 11, -11, 1, -1]
+
+    def create_moves(self):
+        moves_dict = {}
         for i in self.piece_position:
             list_of_moves = []
             for x in self.directions:
@@ -251,6 +418,18 @@ class Knights(Board):
 
 
 while True:
-    w_pieces.create_moves()
-    b_pieces.create_moves()
-
+    w_pieces.create_moves_dict()
+    w_pieces.delete_move_if_check()
+    select_piece = int(input("select a piece: "))
+    select_next_square = int(input("select a square: "))
+    notation = [select_piece, select_next_square]
+    w_pieces.move_a_piece(notation)
+    w_pieces.delete_taken_pieces()
+    
+    b_pieces.create_moves_dict()
+    b_pieces.delete_move_if_check()
+    select_piece = int(input("select a piece: "))
+    select_next_square = int(input("select a square: "))   
+    notation = [select_piece, select_next_square]
+    b_pieces.move_a_piece(notation)
+    b_pieces.delete_taken_pieces()    
