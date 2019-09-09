@@ -72,12 +72,14 @@ class Board:
 
 class WhitePieces(Board):
     def __init__(self):
-        self.w_bishops = [29, 32, 67]
-        self.w_rooks = [27, 34, 55]
-        self.w_knights = [28, 33]
+        self.w_bishops = [29, 32]
+        self.w_rooks = [27, 34]
+        self.w_knights = [28]
         self.w_king = [31]
         self.w_queen = [30]
         self.w_pawns = [39, 40, 41, 42, 43, 44, 45, 46]
+        self.w_short_castling = True
+        self.w_long_castling = True
         self.w_moves = {}
         self.w_moves_list = []
         self.w_lists = [self.w_knights, self.w_pawns, self.w_queen, self.w_bishops, self.w_rooks, self.w_king]
@@ -103,6 +105,7 @@ class WhitePieces(Board):
         w_queen_moves = w_queen.create_moves()
         w_pawns_moves = w_pawn.create_basic_moves()
         w_king_moves = w_king.create_moves()
+        w_king.create_short_castling()
         self.w_moves = {**w_bishops_moves, **w_rooks_moves, **w_queen_moves, **w_knights_moves, **w_pawns_moves,
                         **w_king_moves}
         return self.w_moves
@@ -111,7 +114,7 @@ class WhitePieces(Board):
         b_pieces_counter = -1
         self.b_lists = [b_pieces.b_bishops, b_pieces.b_knights, b_pieces.b_pawns, b_pieces.b_queen, b_pieces.b_rooks]
         for b_piece_list in self.b_lists:
-            b_pieces_counter += 1            
+            b_pieces_counter += 1
             for b_position in b_piece_list:
                 for w_piece_list in self.w_lists:
                     for w_position in w_piece_list:
@@ -152,7 +155,7 @@ class WhitePieces(Board):
             for u in nested_list_of_moves:
                 if t == u:
                     nested_list_of_moves.remove(u)
-        print(nested_list_of_moves)     
+        print(nested_list_of_moves)
 
 
 class BlackPieces(Board):
@@ -162,15 +165,17 @@ class BlackPieces(Board):
         self.b_knights = [112, 117]
         self.b_king = [115]
         self.b_queen = [114]
-        self.b_pawns = [99, 100, 101, 102, 105, 106]
+        self.b_pawns = [99, 100, 101, 102, 103, 104, 105, 106]
         self.b_lists = [self.b_knights, self.b_pawns, self.b_queen, self.b_bishops, self.b_rooks, self.b_king]
+        self.b_short_castling = True
+        self.b_long_castling = True
         self.b_moves = {}
 
     def move_a_piece(self, notation):
         for x in self.b_lists:
             counter = 0
             for z in x:
-                if z == notation[0]:           
+                if z == notation[0]:
                     x[counter] = notation[1]
                 counter += 1
 
@@ -187,7 +192,7 @@ class BlackPieces(Board):
         b_queen_moves = b_queen.create_moves()
         b_pawns_moves = b_pawn.create_basic_moves()
         b_king_moves = b_king.create_moves()
-        self.b_moves = {**b_bishops_moves, **b_rooks_moves, 
+        self.b_moves = {**b_bishops_moves, **b_rooks_moves,
                         **b_queen_moves, **b_knights_moves, **b_pawns_moves, **b_king_moves}
         return self.b_moves
 
@@ -218,7 +223,7 @@ class BlackPieces(Board):
                 for square in lists:
                     if square == self.b_king[0]:
                         delete_these_moves.append(move)
-            if deleted_piece:                                             
+            if deleted_piece:
                 self.w_lists[deleted_piece[0]].append(deleted_piece[1])
             reverse_move = [move[1], move[0]]
             b_pieces.move_a_piece(reverse_move)
@@ -228,7 +233,7 @@ class BlackPieces(Board):
                     nested_list_of_moves.remove(u)
         print(nested_list_of_moves)
 
-                                                                                                                              
+
 class Occupation:
     def __init__(self):
         self.positions = []
@@ -398,14 +403,22 @@ class King(Board):
             self.friendly_occup = self.w_occupation
             self.enemy_occup = self.b_occupation
             self.piece_position = w_pieces.w_king
+            self.short_castling_allowed = w_pieces.w_short_castling
+            self.long_castling_allowed = w_pieces.w_long_castling
+            self.short_castling_squares = [32, 33]
+            self.long_castling_squares = [30, 29, 28]
         else:
             self.friendly_occup = self.b_occupation
             self.enemy_occup = self.w_occupation
             self.piece_position = b_pieces.b_king
+            self.short_castling_allowed = b_pieces.b_short_castling
+            self.long_castling_allowed = b_pieces.b_long_castling
+            self.short_castling_squares = []
+            self.long_castling_squares = []
         self.directions = [12, -12, 13, -13, 11, -11, 1, -1]
+        self.moves_dict = {}
 
     def create_moves(self):
-        moves_dict = {}
         for i in self.piece_position:
             list_of_moves = []
             for x in self.directions:
@@ -413,8 +426,17 @@ class King(Board):
                 on_board = board.square_on_board(self, next_square)
                 if on_board and (next_square not in self.friendly_occup):
                     list_of_moves.append(next_square)
-            moves_dict[i] = list_of_moves
-        return moves_dict
+            self.moves_dict[i] = list_of_moves
+        return self.moves_dict
+
+    def create_short_castling(self):
+        if self.short_castling_allowed:
+            for i in self.short_castling_squares:
+                if i not in self.friendly_occup and i not in self.enemy_occup:
+                    b_attacks = b_pieces.create_moves_dict()
+                    for b_attacks.values():
+                    self.moves_dict[31].append(33)
+
 
 
 while True:
@@ -425,11 +447,11 @@ while True:
     notation = [select_piece, select_next_square]
     w_pieces.move_a_piece(notation)
     w_pieces.delete_taken_pieces()
-    
+
     b_pieces.create_moves_dict()
     b_pieces.delete_move_if_check()
     select_piece = int(input("select a piece: "))
-    select_next_square = int(input("select a square: "))   
+    select_next_square = int(input("select a square: "))
     notation = [select_piece, select_next_square]
     b_pieces.move_a_piece(notation)
-    b_pieces.delete_taken_pieces()    
+    b_pieces.delete_taken_pieces()
