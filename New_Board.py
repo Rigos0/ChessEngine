@@ -549,15 +549,21 @@ class King(Board):
             castling_squares = self.long_castling_squares
             castling_check_squares = self.long_castling_check_squares
 
+        # if the player didn't move his rook or king
         if castling_allowed:
+            # check if there are any pieces in the way
             for i in castling_squares:
-                if i not in self.friendly_occup and i not in self.enemy_occup:
+                if i in self.friendly_occup or i in self.enemy_occup:
+                    return
+                else:
+                    # check if castling squares are attacked by enemy pieces
                     b_attacks = b_pieces.create_moves_dict("trial")
                     for p in b_attacks.values():
-                        if p not in castling_check_squares:
-                            self.moves_dict[castling_check_squares[0]].append(
-                                castling_check_squares[-1])
+                        if p in castling_check_squares:
                             return
+            self.moves_dict[castling_check_squares[0]].append(
+                castling_check_squares[-1])
+
 
 while True:
     w_pieces.create_moves_dict("create")
@@ -567,7 +573,6 @@ while True:
     send_this_move = [select_piece, select_next_square]
     w_pieces.move_a_piece(send_this_move, "the_function_does_not_care")
     w_pieces.delete_taken_pieces()
-
 
     b_pieces.create_moves_dict("create")
     b_pieces.delete_move_if_check()
