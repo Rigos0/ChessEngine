@@ -104,8 +104,6 @@ class WhitePieces(Board):
             if self.w_short_castling:
                 if notation[0] == 31 or notation[0] == 34:
                     self.w_short_castling = False
-                if notation[1] == 118:
-                    b_pieces.b_short_castling = False
                     if notation[1] == 33:
                         self.w_king[0] = 33
                         self.w_rooks.remove(34)
@@ -114,13 +112,15 @@ class WhitePieces(Board):
             if self.w_long_castling:
                 if notation[0] == 27 or notation[0] == 31:
                     self.w_long_castling = False
-                if notation[1] == 111:
-                    b_pieces.b_long_castling = False
                     if notation[1] == 29:
                         self.w_king[0] = 29
                         self.w_rooks.remove(27)
                         self.w_rooks.append(30)
                         return
+            if notation[1] == 118:
+                b_pieces.b_short_castling = False
+            if notation[1] == 111:
+                b_pieces.b_long_castling = False
             if b_pieces.enpassant_can_be_taken_from:
                 if notation[1] in b_pieces.enpassant_can_be_taken_from and notation[0] in self.w_pawns:
                     self.w_pawns.remove(notation[0])
@@ -255,8 +255,6 @@ class BlackPieces(Board):
             if self.b_short_castling:
                 if notation[0] == 115 or notation[0] == 118:
                     self.b_short_castling = False
-                if notation[1] == 34:
-                    w_pieces.w_short_castling = False
                     if notation[1] == 117:
                         self.b_king[0] = 117
                         self.b_rooks.remove(118)
@@ -265,13 +263,15 @@ class BlackPieces(Board):
             if self.b_long_castling:
                 if notation[0] == 111 or notation[0] == 115:
                     self.b_long_castling = False
-                if notation[1] == 27:
-                    w_pieces.w_long_castling = False
                     if notation[1] == 113:
                         self.b_king[0] = 113
                         self.b_rooks.remove(111)
                         self.b_rooks.append(114)
                         return
+            if notation[1] == 34:
+                w_pieces.w_short_castling = False
+            if notation[1] == 27:
+                w_pieces.w_long_castling = False
             if w_pieces.enpassant_can_be_taken_from:
                 if notation[1] in w_pieces.enpassant_can_be_taken_from and notation[0] in self.b_pawns:
                     self.b_pawns.remove(notation[0])
@@ -536,6 +536,7 @@ class King(Board):
             self.short_castling_check_squares = [31, 32, 33]
             self.long_castling_squares = [30, 29, 28]
             self.long_castling_check_squares = [31, 30, 29]
+            self.white = True
         else:
             self.friendly_occup = self.b_occupation
             self.enemy_occup = self.w_occupation
@@ -544,8 +545,9 @@ class King(Board):
             self.long_castling_allowed = b_pieces.b_long_castling
             self.short_castling_squares = [116, 117]
             self.short_castling_check_squares = [115, 116, 117]
-            self.long_castling_squares = [112, 113, 114]
+            self.long_castling_squares = [114, 113, 112]
             self.long_castling_check_squares = [115, 114, 113]
+            self.white = False
         self.directions = [12, -12, 13, -13, 11, -11, 1, -1]
         self.moves_dict = {}
 
@@ -579,11 +581,20 @@ class King(Board):
                     return
                 else:
                     # check if castling squares are attacked by enemy pieces
-                    b_attacks = b_pieces.create_moves_dict("trial")
-                    for p in b_attacks.values():
-                        for x in p:
-                            if x in castling_check_squares:
-                                return
+                    if self.white:
+                        b_attacks = b_pieces.create_moves_dict("trial")
+                        for p in b_attacks.values():
+                            for x in p:
+                                if x in castling_check_squares:
+                                    return
+                    else:
+                        w_attacks = w_pieces.create_moves_dict("trial")
+                        for p in w_attacks.values():
+                            for x in p:
+                                if x in castling_check_squares:
+                                    return
+
+
             self.moves_dict[castling_check_squares[0]].append(
                 castling_check_squares[-1])
 
