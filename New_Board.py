@@ -104,6 +104,8 @@ class WhitePieces(Board):
             if self.w_short_castling:
                 if notation[0] == 31 or notation[0] == 34:
                     self.w_short_castling = False
+                if notation[1] == 118:
+                    b_pieces.b_short_castling = False
                     if notation[1] == 33:
                         self.w_king[0] = 33
                         self.w_rooks.remove(34)
@@ -112,6 +114,8 @@ class WhitePieces(Board):
             if self.w_long_castling:
                 if notation[0] == 27 or notation[0] == 31:
                     self.w_long_castling = False
+                if notation[1] == 111:
+                    b_pieces.b_long_castling = False
                     if notation[1] == 29:
                         self.w_king[0] = 29
                         self.w_rooks.remove(27)
@@ -178,11 +182,11 @@ class WhitePieces(Board):
                             # If we delete a piece during the legal check, we have to revive it afterwards.
                             return [b_pieces_counter, b_position]
 
-        # promotion
-        for i in self.w_pawns:
-            if i in self.last_row:
-                self.w_pawns.remove(i)
-                self.w_queen.append(i)
+        # # promotion
+        # for i in self.w_pawns:
+        #     if i in self.last_row:
+        #         self.w_pawns.remove(i)
+        #         self.w_queen.append(i)
 
     # deletes illegal moves
     def delete_move_if_check(self):
@@ -217,6 +221,18 @@ class WhitePieces(Board):
                 if t == u:
                     nested_list_of_moves.remove(u)
         print(nested_list_of_moves)
+        moves_in_dict = nested_list_to_dictionary(nested_list_of_moves)
+        return moves_in_dict
+
+def nested_list_to_dictionary(nested_list_of_moves):
+    moves_dict = {}
+    for x in nested_list_of_moves:
+        print("x", x)
+        if x[0] in moves_dict.keys():
+            moves_dict[x[0]].append(x[1])
+        else:
+            moves_dict[x[0]] = [x[1]]
+    return moves_dict
 
 
 class BlackPieces(Board):
@@ -239,6 +255,8 @@ class BlackPieces(Board):
             if self.b_short_castling:
                 if notation[0] == 115 or notation[0] == 118:
                     self.b_short_castling = False
+                if notation[1] == 34:
+                    w_pieces.w_short_castling = False
                     if notation[1] == 117:
                         self.b_king[0] = 117
                         self.b_rooks.remove(118)
@@ -247,6 +265,8 @@ class BlackPieces(Board):
             if self.b_long_castling:
                 if notation[0] == 111 or notation[0] == 115:
                     self.b_long_castling = False
+                if notation[1] == 27:
+                    w_pieces.w_long_castling = False
                     if notation[1] == 113:
                         self.b_king[0] = 113
                         self.b_rooks.remove(111)
@@ -292,11 +312,11 @@ class BlackPieces(Board):
         return self.b_moves
 
     def delete_taken_pieces(self):
-        # promotion
-        for i in self.b_pawns:
-            if i in self.last_row:
-                self.b_pawns.remove(i)
-                self.b_queen.append(i)
+        # # promotion
+        # for i in self.b_pawns:
+        #     if i in self.last_row:
+        #         self.b_pawns.remove(i)
+        #         self.b_queen.append(i)
 
         w_pieces_counter = - 1
         self.w_lists = [w_pieces.w_bishops, w_pieces.w_knights, w_pieces.w_pawns, w_pieces.w_queen, w_pieces.w_rooks]
@@ -333,6 +353,8 @@ class BlackPieces(Board):
                 if t == u:
                     nested_list_of_moves.remove(u)
         print(nested_list_of_moves)
+        moves_in_dict = nested_list_to_dictionary(nested_list_of_moves)
+        return moves_in_dict
 
 
 class Occupation:
@@ -463,7 +485,7 @@ class Pawns(Board):
             self.forward = 12
             self.double_move = 24
             self.first_row = [39, 40, 41, 42, 43, 44, 45, 46]
-            self.take_enpassant = []
+            self.take_enpassant = b_pieces.enpassant_can_be_taken_from
         else:
             self.friendly_occup = self.b_occupation
             self.enemy_occup = self.w_occupation
@@ -559,26 +581,27 @@ class King(Board):
                     # check if castling squares are attacked by enemy pieces
                     b_attacks = b_pieces.create_moves_dict("trial")
                     for p in b_attacks.values():
-                        if p in castling_check_squares:
-                            return
+                        for x in p:
+                            if x in castling_check_squares:
+                                return
             self.moves_dict[castling_check_squares[0]].append(
                 castling_check_squares[-1])
 
 
-while True:
-    w_pieces.create_moves_dict("create")
-    w_pieces.delete_move_if_check()
-    select_piece = int(input("select a piece: "))
-    select_next_square = int(input("select a square: "))
-    send_this_move = [select_piece, select_next_square]
-    w_pieces.move_a_piece(send_this_move, "the_function_does_not_care")
-    w_pieces.delete_taken_pieces()
-
-    b_pieces.create_moves_dict("create")
-    b_pieces.delete_move_if_check()
-    select_piece = int(input("select a piece: "))
-    select_next_square = int(input("select a square: "))
-    send_this_move = [select_piece, select_next_square]
-    b_pieces.move_a_piece(send_this_move, "I_cannot_think_of_a_name")
-    b_pieces.delete_taken_pieces()
+# while True:
+#     w_pieces.create_moves_dict("create")
+#     w_pieces.delete_move_if_check()
+#     select_piece = int(input("select a piece: "))
+#     select_next_square = int(input("select a square: "))
+#     send_this_move = [select_piece, select_next_square]
+#     w_pieces.move_a_piece(send_this_move, "the_function_does_not_care")
+#     w_pieces.delete_taken_pieces()
+#
+#     b_pieces.create_moves_dict("create")
+#     b_pieces.delete_move_if_check()
+#     select_piece = int(input("select a piece: "))
+#     select_next_square = int(input("select a square: "))
+#     send_this_move = [select_piece, select_next_square]
+#     b_pieces.move_a_piece(send_this_move, "I_cannot_think_of_a_name")
+#     b_pieces.delete_taken_pieces()
 
