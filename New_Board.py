@@ -104,19 +104,17 @@ class WhitePieces(Board):
             if self.w_short_castling:
                 if notation[0] == 31 or notation[0] == 34:
                     self.w_short_castling = False
-                    if notation[1] == 33:
+                    if notation[1] == 33 and notation[0] == 31:
                         self.w_king[0] = 33
                         self.w_rooks.remove(34)
                         self.w_rooks.append(32)
-                        return
             if self.w_long_castling:
-                if notation[0] == 27 or notation[0] == 31:
+                if notation[0] == 31:
                     self.w_long_castling = False
-                    if notation[1] == 29:
+                    if notation[1] == 29 and notation[0] == 31:
                         self.w_king[0] = 29
                         self.w_rooks.remove(27)
                         self.w_rooks.append(30)
-                        return
             if notation[1] == 118:
                 b_pieces.b_short_castling = False
             if notation[1] == 111:
@@ -142,6 +140,13 @@ class WhitePieces(Board):
                 if z == notation[0]:
                     x[counter] = notation[1]
                 counter += 1
+
+        # promotion
+        if trial != "trial":
+            for i in self.w_pawns:
+                if i in self.last_row:
+                    self.w_pawns.remove(i)
+                    self.w_queen.append(i)
 
     # creates a dictionary with all possible moves in the position
     def create_moves_dict(self, trial):
@@ -182,12 +187,6 @@ class WhitePieces(Board):
                             # If we delete a piece during the legal check, we have to revive it afterwards.
                             return [b_pieces_counter, b_position]
 
-        # # promotion
-        # for i in self.w_pawns:
-        #     if i in self.last_row:
-        #         self.w_pawns.remove(i)
-        #         self.w_queen.append(i)
-
     # deletes illegal moves
     def delete_move_if_check(self):
         # create a nested list containing lists in the form [selected piece, next square]
@@ -220,9 +219,7 @@ class WhitePieces(Board):
             for u in nested_list_of_moves:
                 if t == u:
                     nested_list_of_moves.remove(u)
-        print(nested_list_of_moves)
         moves_in_dict = nested_list_to_dictionary(nested_list_of_moves)
-        print("dict", moves_in_dict)
         return moves_in_dict
 
 def nested_list_to_dictionary(nested_list_of_moves):
@@ -255,19 +252,19 @@ class BlackPieces(Board):
             if self.b_short_castling:
                 if notation[0] == 115 or notation[0] == 118:
                     self.b_short_castling = False
-                    if notation[1] == 117:
+                    if notation[1] == 117 and notation[0] == 115:
                         self.b_king[0] = 117
                         self.b_rooks.remove(118)
                         self.b_rooks.append(116)
-                        return
+
             if self.b_long_castling:
                 if notation[0] == 111 or notation[0] == 115:
                     self.b_long_castling = False
-                    if notation[1] == 113:
+                    if notation[1] == 113 and notation[0] == 115:
                         self.b_king[0] = 113
                         self.b_rooks.remove(111)
                         self.b_rooks.append(114)
-                        return
+
             if notation[1] == 34:
                 w_pieces.w_short_castling = False
             if notation[1] == 27:
@@ -290,6 +287,13 @@ class BlackPieces(Board):
                 if z == notation[0]:
                     x[counter] = notation[1]
                 counter += 1
+
+        # promotion
+        if trial != "trial":
+            for i in self.b_pawns:
+                if i in self.last_row:
+                    self.b_pawns.remove(i)
+                    self.b_queen.append(i)
 
     def create_moves_dict(self, trial):
         b_knight = Knights("black")
@@ -352,7 +356,6 @@ class BlackPieces(Board):
             for u in nested_list_of_moves:
                 if t == u:
                     nested_list_of_moves.remove(u)
-        print(nested_list_of_moves)
         moves_in_dict = nested_list_to_dictionary(nested_list_of_moves)
         return moves_in_dict
 
