@@ -5,6 +5,8 @@ from New_Board import *
 
 white = (255, 255, 255)
 black = (0, 0, 0)
+brown = (145, 91, 57)
+light_blue = (204, 255, 255)
 
 
 def get_square(x, y):
@@ -117,12 +119,30 @@ def square_to_pos(square):
     return pos
 
 
-chess_board = pygame.image.load("chessboard.png")
-chess_board = pygame.transform.scale(chess_board, (640, 640))
 
 
 def chessboard():
-    surface.blit(chess_board, (100, 120))
+    # Size of squares
+    size = 80
+
+    # board length, must be even
+    boardLength = 8
+
+    surface.fill((25, 10, 0))
+    cnt = 0
+    for i in range(1, boardLength + 1):
+        for z in range(1, boardLength + 1):
+            # check if current loop value is even
+            if cnt % 2 == 0:
+                pygame.draw.rect(surface, (255, 204, 155), [21 +(size * z), 40+(size * i), size, size])
+            else:
+                pygame.draw.rect(surface, brown, [21 + (size * z), 40+ (size * i), size, size])
+            cnt += 1
+        # since theres an even number of squares go back one value
+        cnt -= 1
+    # Add a nice boarder
+    pygame.draw.rect(surface, black, [21+size, 40+size, boardLength * size, boardLength * size],2)
+    # surface.blit(chess_board, (100, 120))
 
 
 def blit_dots():
@@ -130,17 +150,16 @@ def blit_dots():
         pos = square_to_pos(square)
         pygame.draw.rect(surface, (235, 99, 31), [pos[0] , pos[1], 80, 80], 5)
 
-
-knight = pygame.image.load("chessknight.png")
-knight = pygame.transform.scale(knight, (75, 75))
+knight = pygame.image.load("whiteknight.png")
+knight = pygame.transform.scale(knight, (74, 74))
 pawn = pygame.image.load("whitepawn.png")
-pawn = pygame.transform.scale(pawn, (78, 78))
+pawn = pygame.transform.scale(pawn, (74, 74))
 bishop = pygame.image.load("whitebishop.png")
 bishop = pygame.transform.scale(bishop, (75, 75))
 rook = pygame.image.load("whiterook.png")
-rook = pygame.transform.scale(rook, (69, 69))
+rook = pygame.transform.scale(rook, (70, 70))
 queen = pygame.image.load("whitequeen.png")
-queen = pygame.transform.scale(queen, (76, 76))
+queen = pygame.transform.scale(queen, (73, 73))
 king = pygame.image.load("whiteking.png")
 king = pygame.transform.scale(king, (76, 76))
 
@@ -226,7 +245,7 @@ def blit_pawn():
     for i in w_pieces.w_pawns:
         square = get_notation_from_27_118(i)
         pos = square_to_pos(square)
-        pos = (pos[0] - 1, pos[1] + 2)
+        pos = (pos[0] +3, pos[1] + 5)
         surface.blit(pawn, pos)
 
 
@@ -266,13 +285,13 @@ def blit_king():
 blackknight = pygame.image.load("blackknight.png")
 blackknight = pygame.transform.scale(blackknight, (76, 76))
 blackpawn = pygame.image.load("blackpawn.png")
-blackpawn = pygame.transform.scale(blackpawn, (78, 78))
+blackpawn = pygame.transform.scale(blackpawn, (74, 74))
 blackbishop = pygame.image.load("blackbishop.png")
 blackbishop = pygame.transform.scale(blackbishop, (75, 75))
 blackrook = pygame.image.load("blackrook.png")
-blackrook = pygame.transform.scale(blackrook, (75, 75))
+blackrook = pygame.transform.scale(blackrook, (73, 73))
 blackqueen = pygame.image.load("blackqueen.png")
-blackqueen = pygame.transform.scale(blackqueen, (76, 76))
+blackqueen = pygame.transform.scale(blackqueen, (74, 74))
 blackking = pygame.image.load("blackking.png")
 blackking = pygame.transform.scale(blackking, (76, 76))
 
@@ -281,7 +300,7 @@ def blit_b_pawn():
     for i in b_pieces.b_pawns:
         square = get_notation_from_27_118(i)
         pos = square_to_pos(square)
-        pos = (pos[0] - 1, pos[1] + 2)
+        pos = (pos[0] + 3, pos[1] + 5)
         surface.blit(blackpawn, pos)
 
 
@@ -364,12 +383,9 @@ def move_pieces(side_to_move, surface):
                 if not initial_square:
                     initial_square.append(converted_square)
 
-                print("converted square", converted_square)
-                print("possible moves", possible_moves)
                 if converted_square and possible_moves:
                     if converted_square in possible_moves:
                         send_this_move = [initial_square[0], converted_square]
-                        print("send_this_move", send_this_move)
                         if side_to_move == "white":
                             w_pieces.move_a_piece(send_this_move, "the_function_does_not_care")
                             w_pieces.delete_taken_pieces()
