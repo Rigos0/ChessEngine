@@ -222,12 +222,12 @@ class WhitePieces(Board):
                     nested_list_of_moves.remove(u)
         print(nested_list_of_moves)
         moves_in_dict = nested_list_to_dictionary(nested_list_of_moves)
+        print("dict", moves_in_dict)
         return moves_in_dict
 
 def nested_list_to_dictionary(nested_list_of_moves):
     moves_dict = {}
     for x in nested_list_of_moves:
-        print("x", x)
         if x[0] in moves_dict.keys():
             moves_dict[x[0]].append(x[1])
         else:
@@ -593,7 +593,6 @@ class King(Board):
                             for x in p:
                                 if x in castling_check_squares:
                                     return
-
 
             self.moves_dict[castling_check_squares[0]].append(
                 castling_check_squares[-1])
