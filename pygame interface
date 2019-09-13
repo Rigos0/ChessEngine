@@ -1,11 +1,12 @@
-import pygame
-from Board import *
-import ctypes
 
-pygame.init()
+import pygame
+from New_Board import *
+
 
 white = (255, 255, 255)
 black = (0, 0, 0)
+brown = (145, 91, 57)
+light_blue = (204, 255, 255)
 
 
 def get_square(x, y):
@@ -36,6 +37,75 @@ def get_square(x, y):
         selected_square = file + rank
         return selected_square
 
+def from_human_notation_to_27_118(square):
+    squares = {
+        27: "a1",
+        28: "b1",
+        29: "c1",
+        30: "d1",
+        31: "e1",
+        32: "f1",
+        33: "g1",
+        34: "h1",
+        39: "a2",
+        40: "b2",
+        41: "c2",
+        42: "d2",
+        43: "e2",
+        44: "f2",
+        45: "g2",
+        46: "h2",
+        51: "a3",
+        52: "b3",
+        53: "c3",
+        54: "d3",
+        55: "e3",
+        56: "f3",
+        57: "g3",
+        58: "h3",
+        63: "a4",
+        64: "b4",
+        65: "c4",
+        66: "d4",
+        67: "e4",
+        68: "f4",
+        69: "g4",
+        70: "h4",
+        75: "a5",
+        76: "b5",
+        77: "c5",
+        78: "d5",
+        79: "e5",
+        80: "f5",
+        81: "g5",
+        82: "h5",
+        87: "a6",
+        88: "b6",
+        89: "c6",
+        90: "d6",
+        91: "e6",
+        92: "f6",
+        93: "g6",
+        94: "h6",
+        99: "a7",
+        100: "b7",
+        101: "c7",
+        102: "d7",
+        103: "e7",
+        104: "f7",
+        105: "g7",
+        106: "h7",
+        111: "a8",
+        112: "b8",
+        113: "c8",
+        114: "d8",
+        115: "e8",
+        116: "f8",
+        117: "g8",
+        118: "h8"}
+    if square:
+        converted = list(squares.keys())[list(squares.values()).index(square)]
+        return converted
 
 def square_to_pos(square):
     ranks = ["8", "7", "6", "5", "4", "3", "2", "1"]
@@ -49,273 +119,306 @@ def square_to_pos(square):
     return pos
 
 
-chess_board = pygame.image.load("chessboard.png")
-chess_board = pygame.transform.scale(chess_board, (640, 640))
 
 
 def chessboard():
-    surface.blit(chess_board, (100, 120))
+    # Size of squares
+    size = 80
+
+    # board length, must be even
+    boardLength = 8
+
+    surface.fill((25, 10, 0))
+    cnt = 0
+    for i in range(1, boardLength + 1):
+        for z in range(1, boardLength + 1):
+            # check if current loop value is even
+            if cnt % 2 == 0:
+                pygame.draw.rect(surface, (255, 204, 155), [21 +(size * z), 40+(size * i), size, size])
+            else:
+                pygame.draw.rect(surface, brown, [21 + (size * z), 40+ (size * i), size, size])
+            cnt += 1
+        # since theres an even number of squares go back one value
+        cnt -= 1
+    # Add a nice boarder
+    pygame.draw.rect(surface, black, [21+size, 40+size, boardLength * size, boardLength * size],2)
+    # surface.blit(chess_board, (100, 120))
 
 
-def blit_dots():
-    for square in Move.dots:
-        pos = square_to_pos(square)
-        pygame.draw.rect(surface, (235, 99, 31), [pos[0] , pos[1], 80, 80], 5)
+def blit_dots(dots):
+    if dots:
+        for square in dots:
+                convert = get_notation_from_27_118(square)
+                pos = square_to_pos(convert)
+                print(pos)
+                pygame.draw.rect(surface, (235, 99, 31), [pos[0] , pos[1], 80, 80], 5)
 
-def blit_b_dots():
-    for square in Move.b_dots:
-        pos = square_to_pos(square)
-        pygame.draw.rect(surface, (235, 99, 31), [pos[0], pos[1], 80, 80], 5)
-# pygame.draw.circle(surface, red, pos, 7)
-
-
-knight = pygame.image.load("chessknight.png")
-knight = pygame.transform.scale(knight, (75, 75))
+knight = pygame.image.load("whiteknight.png")
+knight = pygame.transform.scale(knight, (74, 74))
 pawn = pygame.image.load("whitepawn.png")
-pawn = pygame.transform.scale(pawn, (78, 78))
+pawn = pygame.transform.scale(pawn, (74, 74))
 bishop = pygame.image.load("whitebishop.png")
 bishop = pygame.transform.scale(bishop, (75, 75))
 rook = pygame.image.load("whiterook.png")
-rook = pygame.transform.scale(rook, (69, 69))
+rook = pygame.transform.scale(rook, (70, 70))
 queen = pygame.image.load("whitequeen.png")
-queen = pygame.transform.scale(queen, (76, 76))
+queen = pygame.transform.scale(queen, (73, 73))
 king = pygame.image.load("whiteking.png")
 king = pygame.transform.scale(king, (76, 76))
 
+def get_notation_from_27_118(square):
+    squares = {
+        27: "a1",
+        28: "b1",
+        29: "c1",
+        30: "d1",
+        31: "e1",
+        32: "f1",
+        33: "g1",
+        34: "h1",
+        39: "a2",
+        40: "b2",
+        41: "c2",
+        42: "d2",
+        43: "e2",
+        44: "f2",
+        45: "g2",
+        46: "h2",
+        51: "a3",
+        52: "b3",
+        53: "c3",
+        54: "d3",
+        55: "e3",
+        56: "f3",
+        57: "g3",
+        58: "h3",
+        63: "a4",
+        64: "b4",
+        65: "c4",
+        66: "d4",
+        67: "e4",
+        68: "f4",
+        69: "g4",
+        70: "h4",
+        75: "a5",
+        76: "b5",
+        77: "c5",
+        78: "d5",
+        79: "e5",
+        80: "f5",
+        81: "g5",
+        82: "h5",
+        87: "a6",
+        88: "b6",
+        89: "c6",
+        90: "d6",
+        91: "e6",
+        92: "f6",
+        93: "g6",
+        94: "h6",
+        99: "a7",
+        100: "b7",
+        101: "c7",
+        102: "d7",
+        103: "e7",
+        104: "f7",
+        105: "g7",
+        106: "h7",
+        111: "a8",
+        112: "b8",
+        113: "c8",
+        114: "d8",
+        115: "e8",
+        116: "f8",
+        117: "g8",
+        118: "h8"}
+
+    return_this = squares.get(square)
+    return return_this
 
 def blit_knight():
-    for i in Board.w_knights:
-        square = Board.squares.get(i)
+    for i in w_pieces.w_knights:
+        square = get_notation_from_27_118(i)
         pos = square_to_pos(square)
         pos = (pos[0] + 2, pos[1] + 3)
         surface.blit(knight, pos)
 
 
 def blit_pawn():
-    for i in Board.w_pawns:
-        square = Board.squares.get(i)
+    for i in w_pieces.w_pawns:
+        square = get_notation_from_27_118(i)
         pos = square_to_pos(square)
-        pos = (pos[0] - 1, pos[1] + 2)
+        pos = (pos[0] +3, pos[1] + 5)
         surface.blit(pawn, pos)
 
 
 def blit_bishop():
-    for i in Board.w_bishops:
-        square = Board.squares.get(i)
+    for i in w_pieces.w_bishops:
+        square = get_notation_from_27_118(i)
         pos = square_to_pos(square)
         pos = (pos[0] + 2, pos[1] + 2)
         surface.blit(bishop, pos)
 
 
 def blit_queen():
-    for i in Board.w_queen:
-        square = Board.squares.get(i)
+    for i in w_pieces.w_queen:
+        square = get_notation_from_27_118(i)
         pos = square_to_pos(square)
-        pos = (pos[0] +2, pos[1] +3)
+        pos = (pos[0] + 2, pos[1] + 3)
         surface.blit(queen, pos)
 
 
 def blit_rook():
-    for i in Board.w_rooks:
-        square = Board.squares.get(i)
+    for i in w_pieces.w_rooks:
+        square = get_notation_from_27_118(i)
+
         pos = square_to_pos(square)
-        pos = (pos[0] + 6, pos[1]+8)
+        pos = (pos[0] + 6, pos[1] + 8)
         surface.blit(rook, pos)
 
 
 def blit_king():
-    for i in Board.w_king:
-        square = Board.squares.get(i)
+    for i in w_pieces.w_king:
+        square = get_notation_from_27_118(i)
         pos = square_to_pos(square)
-        pos = (pos[0] + 2, pos[1] +2)
+        pos = (pos[0] + 2, pos[1] + 2)
         surface.blit(king, pos)
+
 
 blackknight = pygame.image.load("blackknight.png")
 blackknight = pygame.transform.scale(blackknight, (76, 76))
 blackpawn = pygame.image.load("blackpawn.png")
-blackpawn = pygame.transform.scale(blackpawn, (78, 78))
+blackpawn = pygame.transform.scale(blackpawn, (74, 74))
 blackbishop = pygame.image.load("blackbishop.png")
 blackbishop = pygame.transform.scale(blackbishop, (75, 75))
 blackrook = pygame.image.load("blackrook.png")
-blackrook = pygame.transform.scale(blackrook, (75, 75))
+blackrook = pygame.transform.scale(blackrook, (73, 73))
 blackqueen = pygame.image.load("blackqueen.png")
-blackqueen = pygame.transform.scale(blackqueen, (76, 76))
+blackqueen = pygame.transform.scale(blackqueen, (74, 74))
 blackking = pygame.image.load("blackking.png")
 blackking = pygame.transform.scale(blackking, (76, 76))
 
 
 def blit_b_pawn():
-    for i in Board.b_pawns:
-        square = Board.squares.get(i)
+    for i in b_pieces.b_pawns:
+        square = get_notation_from_27_118(i)
         pos = square_to_pos(square)
-        pos = (pos[0] -1, pos[1] +2)
+        pos = (pos[0] + 3, pos[1] + 5)
         surface.blit(blackpawn, pos)
 
 
 def blit_b_bishop():
-    for i in Board.b_bishops:
-        square = Board.squares.get(i)
+    for i in b_pieces.b_bishops:
+        square = get_notation_from_27_118(i)
         pos = square_to_pos(square)
-        pos = (pos[0] +2, pos[1] +2)
+        pos = (pos[0] + 2, pos[1] + 2)
         surface.blit(blackbishop, pos)
 
 
 def blit_b_queen():
-    for i in Board.b_queen:
-        square = Board.squares.get(i)
+    for i in b_pieces.b_queen:
+        square = get_notation_from_27_118(i)
         pos = square_to_pos(square)
         pos = (pos[0] + 2, pos[1] + 3)
         surface.blit(blackqueen, pos)
 
 
 def blit_b_rook():
-    for i in Board.b_rooks:
-        square = Board.squares.get(i)
+    for i in b_pieces.b_rooks:
+        square = get_notation_from_27_118(i)
         pos = square_to_pos(square)
-        pos = (pos[0] + 2, pos[1]+4)
+        pos = (pos[0] + 2, pos[1] + 4)
         surface.blit(blackrook, pos)
 
 
 def blit_b_king():
-    for i in Board.b_king:
-        square = Board.squares.get(i)
+    for i in b_pieces.b_king:
+        square = get_notation_from_27_118(i)
         pos = square_to_pos(square)
-        pos = (pos[0] + 2, pos[1] +2)
+        pos = (pos[0] + 2, pos[1] + 2)
         surface.blit(blackking, pos)
 
 
 def blit_b_knight():
-    for i in Board.b_knights:
-        square = Board.squares.get(i)
+    for i in b_pieces.b_knights:
+        square = get_notation_from_27_118(i)
         pos = square_to_pos(square)
-        pos = (pos[0] , pos[1] + 2)
+        pos = (pos[0], pos[1] + 2)
         surface.blit(blackknight, pos)
 
-
-def WhiteMove(surface):
-    blitdots = False
-    global selected_square
-    selected_square = str
-    previous_selected_square = []
-    counter = 0
-    create_occupation_lists()
-    mouse_down = False
-    b_main()
-    w_main()
-
-    while True:
-        surface.fill((0, 0, 0))
-        chessboard()  # this is just to draw a board
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                quit()
-
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_down = True
-                x, y = pygame.mouse.get_pos()
-                selected_square = get_square(x, y)
-                previous_selected_square.append(selected_square)
-                counter += 1
-
-                for i in Move.dots:
-                    if i == selected_square:
-                        global square_to_go
-                        square_to_go = previous_selected_square[counter - 2] + "-" + i
-                        main_w_move(square_to_go)
-                        Board.w_attacks = []
-                        mouse_down = False
-                        return
-
-                blitdots = True
-
-            if event.type == pygame.VIDEORESIZE:
-                surface = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
-
-        w_get_squares(selected_square)
-        blit_pawn()
-        blit_bishop()
-        blit_knight()
-        blit_rook()
-        blit_queen()
-        blit_king()
-        blit_b_knight()
-        blit_b_pawn()
-        blit_b_bishop()
-        blit_b_rook()
-        blit_b_queen()
-        blit_b_king()
-
-        if blitdots:
-            blit_dots()
-        pygame.display.update()
-
-
-def BlackMove(surface):
-    blitdots = False
-    global selected_square
-    selected_square = str
-    previous_selected_square = []
-    counter = 0
-    create_occupation_lists()
-    mouse_down = False
-
-    w_main()
-    b_main()
-
-    while True:
-        surface.fill((0, 0, 0))
-        chessboard()  # this is just to draw a board
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                quit()
-            if event.type == pygame.VIDEORESIZE:
-                surface = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
-
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_down = True
-                x, y = pygame.mouse.get_pos()
-                selected_square = get_square(x, y)
-                previous_selected_square.append(selected_square)
-                counter += 1
-
-                for i in Move.dots:
-                    if i == selected_square:
-                        global square_to_go
-                        square_to_go = previous_selected_square[counter - 2] + "-" + i
-                        main_b_move(square_to_go)
-                        mouse_down = False
-                        return
-
-                blitdots = True
-
-        b_get_squares(selected_square)
-        blit_pawn()
-        blit_bishop()
-        blit_knight()
-        blit_rook()
-        blit_queen()
-        blit_king()
-        blit_b_knight()
-        blit_b_pawn()
-        blit_b_bishop()
-        blit_b_rook()
-        blit_b_queen()
-        blit_b_king()
-
-        if blitdots:
-            blit_dots()
-        pygame.display.update()
-
+pygame.init()
 screensize = pygame.display.Info()
 surface = pygame.display.set_mode((screensize.current_h, screensize.current_w), pygame.RESIZABLE)
-user32 = ctypes.WinDLL('user32')
 
-SW_MAXIMISE = 3
 
-hWnd = user32.GetForegroundWindow()
-user32.ShowWindow(hWnd, SW_MAXIMISE)
-while True:
-    WhiteMove(surface)
-    BlackMove(surface)
+def main():
+    while True:
+        move_pieces("white", surface)
+        move_pieces("black", surface)
+
+
+def move_pieces(side_to_move, surface):
+    if side_to_move == "white":
+        w_pieces.create_moves_dict("create")
+        dictionary_with_moves = w_pieces.delete_move_if_check()
+
+    else:
+        b_pieces.create_moves_dict("create")
+        dictionary_with_moves = b_pieces.delete_move_if_check()
+    possible_moves = []
+    initial_square = []
+    while True:
+        surface.fill((0, 0, 0))
+        chessboard()  # this is just to draw a board
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            if event.type == pygame.VIDEORESIZE:
+                surface = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                x, y = pygame.mouse.get_pos()
+                selected_square = get_square(x, y)
+                # get a square we clicked on in 27 to 118 notation
+                converted_square = from_human_notation_to_27_118(selected_square)
+                if not initial_square:
+                    initial_square.append(converted_square)
+
+                if converted_square and possible_moves:
+                    if converted_square in possible_moves:
+                        send_this_move = [initial_square[0], converted_square]
+                        if side_to_move == "white":
+                            w_pieces.move_a_piece(send_this_move, "the_function_does_not_care")
+                            w_pieces.delete_taken_pieces()
+                        else:
+                            b_pieces.move_a_piece(send_this_move, "I_cannot_think_of_a_name")
+                            b_pieces.delete_taken_pieces()
+                        return
+                    else:
+                        initial_square = [converted_square]
+                        possible_moves = dictionary_with_moves.get(converted_square)
+                else:
+                    initial_square = [converted_square]
+                    possible_moves = dictionary_with_moves.get(converted_square)
+
+        blit_dots(possible_moves)
+        blit_pawn()
+        blit_bishop()
+        blit_knight()
+        blit_rook()
+        blit_queen()
+        blit_king()
+        blit_b_knight()
+        blit_b_pawn()
+        blit_b_bishop()
+        blit_b_rook()
+        blit_b_queen()
+        blit_b_king()
+        print(possible_moves)
+
+        pygame.display.update()
+
+
+main()
