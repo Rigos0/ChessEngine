@@ -512,7 +512,8 @@ class Pawns(Board):
             # if pawns are on second row, append double moves
             if i in self.first_row and (i + self.double_move) not in self.friendly_occup and (
                     i + self.double_move) not in self.enemy_occup:
-                list_of_moves.append(i + self.double_move)
+                if on_board and (next_square not in self.friendly_occup and next_square not in self.enemy_occup):
+                      list_of_moves.append(i + self.double_move)
             # append taking
             if i + self.take_right in self.enemy_occup or i + self.take_right in self.take_enpassant:
                 list_of_moves.append(i + self.take_right)
