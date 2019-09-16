@@ -1,6 +1,8 @@
 
 import pygame
 from New_Board import *
+from tkinter import *
+from tkinter import messagebox
 
 
 white = (255, 255, 255)
@@ -145,10 +147,12 @@ def chessboard():
     # surface.blit(chess_board, (100, 120))
 
 
-def blit_dots():
-    for square in Move.dots:
-        pos = square_to_pos(square)
-        pygame.draw.rect(surface, (235, 99, 31), [pos[0] , pos[1], 80, 80], 5)
+def blit_dots(dots):
+    if dots:
+        for square in dots:
+                convert = get_notation_from_27_118(square)
+                pos = square_to_pos(convert)
+                pygame.draw.rect(surface, (235, 99, 31), [pos[0] , pos[1], 80, 80], 5)
 
 knight = pygame.image.load("whiteknight.png")
 knight = pygame.transform.scale(knight, (74, 74))
@@ -343,13 +347,17 @@ def blit_b_knight():
         pos = (pos[0], pos[1] + 2)
         surface.blit(blackknight, pos)
 
+
 pygame.init()
+myfont = pygame.font.SysFont('Comic Sans MS', 30)
+pygame.font.init()  # you have to call this at the start,
 screensize = pygame.display.Info()
 surface = pygame.display.set_mode((screensize.current_h, screensize.current_w), pygame.RESIZABLE)
 
 
 def main():
     while True:
+
         move_pieces("white", surface)
         move_pieces("black", surface)
 
@@ -400,6 +408,7 @@ def move_pieces(side_to_move, surface):
                     initial_square = [converted_square]
                     possible_moves = dictionary_with_moves.get(converted_square)
 
+        blit_dots(possible_moves)
         blit_pawn()
         blit_bishop()
         blit_knight()
@@ -412,8 +421,18 @@ def move_pieces(side_to_move, surface):
         blit_b_rook()
         blit_b_queen()
         blit_b_king()
+        if not dictionary_with_moves:
+            pygame.draw.rect(surface, black, (265, 370, 310, 115))
+            pygame.draw.rect(surface, white, (270, 375, 300, 105))
+            myfont = pygame.font.SysFont('Calibri', 50)
+            textsurface = myfont.render('Checkmate', True, (0, 0, 0))
+            surface.blit(textsurface, (310, 400))
+
+
 
         pygame.display.update()
 
 
 main()
+
+
