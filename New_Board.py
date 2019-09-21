@@ -2,7 +2,7 @@
 # We don't start from 0 because we would not be able
 # to easily detect edges of the board.
 
-# git test
+
 class Board:
     squares = {
         27: "a1",
