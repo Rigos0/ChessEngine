@@ -1,4 +1,5 @@
-import sys, select
+import time
+
 
 stop = False
 while not stop:
@@ -22,24 +23,20 @@ while not stop:
    elif token.startswith('go'):
        depth = 0
        score = 1
-       time = 2
+       timer = 2
        nodes = 2000
        nps = 5000
        bestmove = str('e4')
-
-       while True:
-        interrupt, o, e = select.select([sys.stdin], [], [], 0.2)
-        if interrupt:
-            message = str(sys.stdin.readline().strip())
-            if message == 'stop':
-                break
-            elif message == 'quit':
-                stop = True
-                break
-
-        else:
-            print('info depth', (depth), 'score cp ',(score), 'time', (time), 'nodes', (nodes), 'nps', (nps), 'pv', (bestmove))
-
+       for i in range(1,20):
+           time.sleep(1)
+           print('info depth', (depth), 'score cp ',(score), 'time', (timer), 'nodes', (nodes), 'nps', (nps), 'pv', (bestmove))
+           depth += 0
+           score += 1
+           timer += 2
+           nodes += 2000
+           nps += 5000
+       
+                  
    else:
        pass
 
