@@ -1,14 +1,17 @@
-
 import pygame
 from New_Board import *
-from tkinter import *
-from tkinter import messagebox
-
+from evaluation import select_random_move
+from evaluation import static_evaluation
+from evaluation import white_search
+from evaluation import play_the_best_move
+import time
 
 white = (255, 255, 255)
 black = (0, 0, 0)
 brown = (145, 91, 57)
 light_blue = (204, 255, 255)
+
+
 
 
 def get_square(x, y):
@@ -354,15 +357,18 @@ pygame.font.init()  # you have to call this at the start,
 screensize = pygame.display.Info()
 surface = pygame.display.set_mode((screensize.current_h, screensize.current_w), pygame.RESIZABLE)
 
+global checkmate
+checkmate = False
 
-def main():
+
+def interface_main():
     while True:
-
         move_pieces("white", surface)
         move_pieces("black", surface)
 
 
 def move_pieces(side_to_move, surface):
+    global checkmate
     if side_to_move == "white":
         w_pieces.create_moves_dict("create")
         dictionary_with_moves = w_pieces.delete_move_if_check()
@@ -383,30 +389,33 @@ def move_pieces(side_to_move, surface):
             if event.type == pygame.VIDEORESIZE:
                 surface = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
 
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                x, y = pygame.mouse.get_pos()
-                selected_square = get_square(x, y)
-                # get a square we clicked on in 27 to 118 notation
-                converted_square = from_human_notation_to_27_118(selected_square)
-                if not initial_square:
-                    initial_square.append(converted_square)
+            # if event.type == pygame.MOUSEBUTTONDOWN:
+            #     x, y = pygame.mouse.get_pos()
+            #     selected_square = get_square(x, y)
+            #     # get a square we clicked on in 27 to 118 notation
+            #     converted_square = from_human_notation_to_27_118(selected_square)
+            #     if not initial_square:
+            #         initial_square.append(converted_square)
+            #
+            #     if converted_square and possible_moves:
+            #         if converted_square in possible_moves:
+            #             # send move according to selected piece and square
+            #             send_this_move = [initial_square[0], converted_square]
+            #             if side_to_move == "white":
+            #                 w_pieces.move_a_piece(send_this_move, "o")
+            #                 w_pieces.delete_taken_pieces()
+            #             else:
+            #                 b_pieces.move_a_piece(send_this_move, "o")
+            #                 b_pieces.delete_taken_pieces()
+            #             return
+            #         else:
+            #             initial_square = [converted_square]
+            #             possible_moves = dictionary_with_moves.get(converted_square)
+            #     else:
+            #         initial_square = [converted_square]
+            #         possible_moves = dictionary_with_moves.get(converted_square)
 
-                if converted_square and possible_moves:
-                    if converted_square in possible_moves:
-                        send_this_move = [initial_square[0], converted_square]
-                        if side_to_move == "white":
-                            w_pieces.move_a_piece(send_this_move, "the_function_does_not_care")
-                            w_pieces.delete_taken_pieces()
-                        else:
-                            b_pieces.move_a_piece(send_this_move, "I_cannot_think_of_a_name")
-                            b_pieces.delete_taken_pieces()
-                        return
-                    else:
-                        initial_square = [converted_square]
-                        possible_moves = dictionary_with_moves.get(converted_square)
-                else:
-                    initial_square = [converted_square]
-                    possible_moves = dictionary_with_moves.get(converted_square)
+
 
         blit_dots(possible_moves)
         blit_pawn()
@@ -422,17 +431,27 @@ def move_pieces(side_to_move, surface):
         blit_b_queen()
         blit_b_king()
         if not dictionary_with_moves:
-            pygame.draw.rect(surface, black, (265, 370, 310, 115))
-            pygame.draw.rect(surface, white, (270, 375, 300, 105))
+            pygame.draw.rect(surface, black, (765, 370, 310, 115))
+            pygame.draw.rect(surface, white, (740, 375, 300, 105))
             myfont = pygame.font.SysFont('Calibri', 50)
             textsurface = myfont.render('Checkmate', True, (0, 0, 0))
-            surface.blit(textsurface, (310, 400))
-
-
+            surface.blit(textsurface, (780, 400))
+            checkmate = True
 
         pygame.display.update()
+        time.sleep(0.5)
+        if not checkmate:
+            nested_list = dictionary_to_nested_list(dictionary_with_moves)
+            if side_to_move == "black":
+                random_move = select_random_move(nested_list)
+                b_pieces.move_a_piece(random_move, "o")
+                b_pieces.delete_taken_pieces()
+                return
+            elif side_to_move == "white":
+                eval = white_search(nested_list)
+                best_move = play_the_best_move(eval)
+                w_pieces.move_a_piece(best_move, "o")
+                w_pieces.delete_taken_pieces()
+                return
 
-
-main()
-
-
+interface_main()
