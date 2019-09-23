@@ -109,7 +109,7 @@ class WhitePieces(Board):
                         self.w_rooks.remove(34)
                         self.w_rooks.append(32)
             if self.w_long_castling:
-                if notation[0] == 31:
+                if notation[0] == 31 or notation[0] == 27:
                     self.w_long_castling = False
                     if notation[1] == 29 and notation[0] == 31:
                         self.w_king[0] = 29
@@ -190,12 +190,8 @@ class WhitePieces(Board):
     # deletes illegal moves
     def delete_move_if_check(self):
         # create a nested list containing lists in the form [selected piece, next square]
-        nested_list_of_moves = []
         delete_these_moves = []
-        for x, y in self.w_moves.items():
-            for i in y:
-                piece_square_list = [x, i]
-                nested_list_of_moves.append(piece_square_list)
+        nested_list_of_moves = dictionary_to_nested_list(self.w_moves)
         # try to make the move and generate black's threats, if one of the black's pieces attacks our king, then delete
         # the move from the list of possible moves
         for move in nested_list_of_moves:
@@ -222,6 +218,7 @@ class WhitePieces(Board):
         moves_in_dict = nested_list_to_dictionary(nested_list_of_moves)
         return moves_in_dict
 
+
 def nested_list_to_dictionary(nested_list_of_moves):
     moves_dict = {}
     for x in nested_list_of_moves:
@@ -230,6 +227,15 @@ def nested_list_to_dictionary(nested_list_of_moves):
         else:
             moves_dict[x[0]] = [x[1]]
     return moves_dict
+
+
+def dictionary_to_nested_list(dict):
+    nested_list_of_moves = []
+    for x, y in dict.items():
+        for i in y:
+            piece_square_list = [x, i]
+            nested_list_of_moves.append(piece_square_list)
+    return nested_list_of_moves
 
 
 class BlackPieces(Board):
@@ -605,6 +611,7 @@ class King(Board):
 # while True:
 #     w_pieces.create_moves_dict("create")
 #     w_pieces.delete_move_if_check()
+#     print(dictionary_to_nested_list(w_pieces.w_moves))
 #     select_piece = int(input("select a piece: "))
 #     select_next_square = int(input("select a square: "))
 #     send_this_move = [select_piece, select_next_square]
@@ -618,4 +625,5 @@ class King(Board):
 #     send_this_move = [select_piece, select_next_square]
 #     b_pieces.move_a_piece(send_this_move, "I_cannot_think_of_a_name")
 #     b_pieces.delete_taken_pieces()
-
+#
+#
