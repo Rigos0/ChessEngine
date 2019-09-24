@@ -175,7 +175,7 @@ class WhitePieces(Board):
     # if so, delete the piece that was there first
     def delete_taken_pieces(self):
         b_pieces_counter = -1
-        self.b_lists = [b_pieces.b_bishops, b_pieces.b_knights, b_pieces.b_pawns, b_pieces.b_queen, b_pieces.b_rooks]
+        self.b_lists = [b_pieces.b_bishops, b_pieces.b_knights, b_pieces.b_pawns, b_pieces.b_queen, b_pieces.b_rooks, b_pieces.b_king]
         for b_piece_list in self.b_lists:
             b_pieces_counter += 1
             for b_position in b_piece_list:
@@ -188,17 +188,17 @@ class WhitePieces(Board):
                             return [b_pieces_counter, b_position]
 
     # deletes illegal moves
-    def delete_move_if_check(self):
+    def delete_move_if_check(self, return_list_or_dict):
         # create a nested list containing lists in the form [selected piece, next square]
         delete_these_moves = []
         nested_list_of_moves = dictionary_to_nested_list(self.w_moves)
         # try to make the move and generate black's threats, if one of the black's pieces attacks our king, then delete
         # the move from the list of possible moves
         for move in nested_list_of_moves:
-            w_pieces.move_a_piece(move, "trial")
+            self.move_a_piece(move, "trial")
             # try to delete a piece if we take one, this variable stores information about the piece so we can return it
             # afterwards
-            deleted_piece = w_pieces.delete_taken_pieces()
+            deleted_piece = self.delete_taken_pieces()
             b_attacks = b_pieces.create_moves_dict("trial")
             for lists in b_attacks.values():
                 for square in lists:
@@ -209,14 +209,17 @@ class WhitePieces(Board):
             # we tried to execute the move to check if our king would be hanging, therefore we have to take the move
             # back
             reverse_move = [move[1], move[0]]
-            w_pieces.move_a_piece(reverse_move, "trial")
+            self.move_a_piece(reverse_move, "trial")
         # it is not possible to delete an item directly in the process because it would mess up the 'for' loop
         for t in delete_these_moves:
             for u in nested_list_of_moves:
                 if t == u:
                     nested_list_of_moves.remove(u)
-        moves_in_dict = nested_list_to_dictionary(nested_list_of_moves)
-        return moves_in_dict
+        if return_list_or_dict != "list":
+            moves_in_dict = nested_list_to_dictionary(nested_list_of_moves)
+            return moves_in_dict
+        else:
+            return nested_list_of_moves
 
 
 def nested_list_to_dictionary(nested_list_of_moves):
@@ -339,7 +342,7 @@ class BlackPieces(Board):
                             w_piece_list.remove(w_position)
                             return [w_pieces_counter, b_position]
 
-    def delete_move_if_check(self):
+    def delete_move_if_check(self,return_list_or_dict ):
         nested_list_of_moves = []
         delete_these_moves = []
         for x, y in self.b_moves.items():
@@ -347,8 +350,8 @@ class BlackPieces(Board):
                 piece_square_list = [x, i]
                 nested_list_of_moves.append(piece_square_list)
         for move in nested_list_of_moves:
-            b_pieces.move_a_piece(move, "trial")
-            deleted_piece = b_pieces.delete_taken_pieces()
+            self.move_a_piece(move, "trial")
+            deleted_piece = self.delete_taken_pieces()
             w_attacks = w_pieces.create_moves_dict("trial")
             for lists in w_attacks.values():
                 for square in lists:
@@ -357,13 +360,16 @@ class BlackPieces(Board):
             if deleted_piece:
                 self.w_lists[deleted_piece[0]].append(deleted_piece[1])
             reverse_move = [move[1], move[0]]
-            b_pieces.move_a_piece(reverse_move, "trial")
+            self.move_a_piece(reverse_move, "trial")
         for t in delete_these_moves:
             for u in nested_list_of_moves:
                 if t == u:
                     nested_list_of_moves.remove(u)
-        moves_in_dict = nested_list_to_dictionary(nested_list_of_moves)
-        return moves_in_dict
+        if return_list_or_dict != "list":
+            moves_in_dict = nested_list_to_dictionary(nested_list_of_moves)
+            return moves_in_dict
+        else:
+            return nested_list_of_moves
 
 
 class Occupation:
@@ -610,7 +616,7 @@ class King(Board):
 
 # while True:
 #     w_pieces.create_moves_dict("create")
-#     w_pieces.delete_move_if_check()
+#     w_pieces.delete_move_if_check("dictionary")
 #     print(dictionary_to_nested_list(w_pieces.w_moves))
 #     select_piece = int(input("select a piece: "))
 #     select_next_square = int(input("select a square: "))
@@ -619,7 +625,7 @@ class King(Board):
 #     w_pieces.delete_taken_pieces()
 #
 #     b_pieces.create_moves_dict("create")
-#     b_pieces.delete_move_if_check()
+#     b_pieces.delete_move_if_check("dictionary")
 #     select_piece = int(input("select a piece: "))
 #     select_next_square = int(input("select a square: "))
 #     send_this_move = [select_piece, select_next_square]
