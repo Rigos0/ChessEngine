@@ -1,7 +1,7 @@
 import pygame
 from New_Board import *
-from Evaluation import select_random_move
-from Evaluation import static_evaluation
+from evaluation import Search, choose_the_best_move, select_random_move
+
 import time
 
 white = (255, 255, 255)
@@ -355,6 +355,8 @@ pygame.font.init()  # you have to call this at the start,
 screensize = pygame.display.Info()
 surface = pygame.display.set_mode((screensize.current_h, screensize.current_w), pygame.RESIZABLE)
 
+search = Search()
+
 global checkmate
 checkmate = False
 
@@ -363,18 +365,17 @@ def interface_main():
     while True:
         move_pieces("white", surface)
         move_pieces("black", surface)
-        print(static_evaluation())
 
 
 def move_pieces(side_to_move, surface):
     global checkmate
     if side_to_move == "white":
         w_pieces.create_moves_dict("create")
-        dictionary_with_moves = w_pieces.delete_move_if_check()
+        dictionary_with_moves = w_pieces.delete_move_if_check("dictionary")
 
     else:
         b_pieces.create_moves_dict("create")
-        dictionary_with_moves = b_pieces.delete_move_if_check()
+        dictionary_with_moves = b_pieces.delete_move_if_check("dictionary")
     possible_moves = []
     initial_square = []
     while True:
@@ -438,16 +439,22 @@ def move_pieces(side_to_move, surface):
             checkmate = True
 
         pygame.display.update()
-        time.sleep(0)
+        time.sleep(0.5)
+        nested_list = dictionary_to_nested_list(dictionary_with_moves)
         if not checkmate:
+            search.ply = 3
             if side_to_move == "black":
-                random_move = select_random_move(dictionary_to_nested_list(dictionary_with_moves))
+                random_move = select_random_move(nested_list)
                 b_pieces.move_a_piece(random_move, "o")
                 b_pieces.delete_taken_pieces()
                 return
-            elif side_to_move == "white":
-                random_move = select_random_move(dictionary_to_nested_list(dictionary_with_moves))
-                w_pieces.move_a_piece(random_move, "o")
+            else:
+                eval_dictionary = search.search("white")
+                the_best_move = choose_the_best_move(eval_dictionary)
+                w_pieces.move_a_piece(the_best_move, "o")
+
+                # random_move = select_random_move(nested_list)
+                # w_pieces.move_a_piece(random_move, "o")
                 w_pieces.delete_taken_pieces()
                 return
 
