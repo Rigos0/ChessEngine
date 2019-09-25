@@ -6,9 +6,8 @@ class Search(WhitePieces, BlackPieces):
     def __init__(self):
         WhitePieces.__init__(self)
         BlackPieces.__init__(self)
-        self.evaluation_dict = {}
         self.hash_table = {}
-        self.ply = 3
+        self.ply = 1
 
     def static_evaluation(self):
         w_material = len(w_pieces.w_pawns) + len(w_pieces.w_queen) * 9 + len(w_pieces.w_rooks) * 5 \
@@ -24,13 +23,14 @@ class Search(WhitePieces, BlackPieces):
         return rounded
 
     def search(self, side_to_move):
-        self.evaluation_dict.clear()
+        evaluation_dictionary = {}
         if side_to_move == "white":
             # we don't need to worry about canceling castling or en passant stuff in the parent class (I hope),
             # therefore we won't use the parameter "trial"
             w_pieces.create_moves_dict("trial")
             # generate possible moves in current position
             possible_moves_list = w_pieces.delete_move_if_check("list")
+            print("moves", possible_moves_list)
             exact_same_eval_counter = 1
             for move in possible_moves_list:
                 # get evaluation after every possible move
@@ -38,27 +38,25 @@ class Search(WhitePieces, BlackPieces):
                 deleted_piece = w_pieces.delete_taken_pieces()
 
                 # to avoid evaluating the same position again and again
-                current_position_hash = self.hash_current_position()
-                if current_position_hash not in self.hash_table:
-                    evaluation = self.static_evaluation()
-                    self.hash_table[current_position_hash] = evaluation
-                else:
-                    evaluation = self.hash_table[current_position_hash]
+                # current_position_hash = self.hash_current_position()
+                # if current_position_hash not in self.hash_table:
+                evaluation = self.static_evaluation()
+                #     self.hash_table[current_position_hash] = evaluation
+                # else:
+                #     evaluation = self.hash_table[current_position_hash]
 
-                if evaluation not in self.evaluation_dict:
-                    self.evaluation_dict[evaluation] = move
+                if evaluation not in evaluation_dictionary:
+                    evaluation_dictionary[evaluation] = move
                 else:
                     evaluation += exact_same_eval_counter
                     exact_same_eval_counter += 1
-                    self.evaluation_dict[evaluation] = move
+                    evaluation_dictionary[evaluation] = move
+                print("evaluation", evaluation_dictionary)
                 if self.ply > 0:
                     self.ply -= 1
                     black_eval = self.search("black")
-                    try:
-                        mini = min(black_eval.keys())
-                        self.evaluation_dict[mini] = self.evaluation_dict.pop(evaluation)
-                    except ValueError:
-                        pass
+                    mini = min(black_eval.keys())
+                    evaluation_dictionary[mini] = evaluation_dictionary.pop(evaluation)
 
                 if deleted_piece:
                     w_pieces.b_lists[deleted_piece[0]].append(deleted_piece[1])
@@ -66,10 +64,11 @@ class Search(WhitePieces, BlackPieces):
                 w_pieces.move_a_piece(reverse_move, "trial")
 
 
-        elif side_to_move == "black":
+        else:
             b_pieces.create_moves_dict("trial")
             # generate possible moves in current position
             possible_moves_list = b_pieces.delete_move_if_check("list")
+            print("black", possible_moves_list)
 
             exact_same_eval_counter = 1
             for move in possible_moves_list:
@@ -78,34 +77,31 @@ class Search(WhitePieces, BlackPieces):
                 deleted_piece = b_pieces.delete_taken_pieces()
 
                 # to avoid evaluating the same position again and again
-                current_position_hash = self.hash_current_position()
-                if current_position_hash not in self.hash_table:
-                    evaluation = self.static_evaluation()
-                    self.hash_table[current_position_hash] = evaluation
-                else:
-                    evaluation = self.hash_table[current_position_hash]
+                # current_position_hash = self.hash_current_position()
+                # if current_position_hash not in self.hash_table:
+                evaluation = self.static_evaluation()
+                #     self.hash_table[current_position_hash] = evaluation
+                # else:
+                #     evaluation = self.hash_table[current_position_hash]
 
-                if evaluation not in self.evaluation_dict:
-                    self.evaluation_dict[evaluation] = move
+                if evaluation not in evaluation_dictionary:
+                    evaluation_dictionary[evaluation] = move
                 else:
                     evaluation += exact_same_eval_counter
                     exact_same_eval_counter += 1
-
+                print("black evaluation", evaluation_dictionary)
                 if self.ply > 0:
                     white_eval = self.search("white")
                     self.ply -= 1
-                    try:
-                        maxi = max(white_eval.keys())
-                        self.evaluation_dict[maxi] = self.evaluation_dict.pop(evaluation)
-                    except ValueError:
-                        pass
+                    maxi = max(white_eval.keys())
+                    evaluation_dictionary[maxi] = evaluation_dictionary.pop(evaluation)
 
                 if deleted_piece:
                     b_pieces.w_lists[deleted_piece[0]].append(deleted_piece[1])
                 reverse_move = [move[1], move[0]]
                 b_pieces.move_a_piece(reverse_move, "trial")
 
-        return self.evaluation_dict
+        return evaluation_dictionary
 
     def hash_current_position(self):
         list_of_tuples = []
