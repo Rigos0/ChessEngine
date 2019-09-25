@@ -1,13 +1,15 @@
 import random
 from New_Board import *
 
+global node_count
 
 class Search(WhitePieces, BlackPieces):
     def __init__(self):
         WhitePieces.__init__(self)
         BlackPieces.__init__(self)
         self.hash_table = {}
-        self.ply = 1
+        self.depth = 0
+        self.node_count = 0
 
     def static_evaluation(self):
         w_material = len(w_pieces.w_pawns) + len(w_pieces.w_queen) * 9 + len(w_pieces.w_rooks) * 5 \
@@ -22,42 +24,39 @@ class Search(WhitePieces, BlackPieces):
 
         return rounded
 
-    def search(self, side_to_move):
-        evaluation_dictionary = {}
+    def search(self, side_to_move, last):
         if side_to_move == "white":
-            # we don't need to worry about canceling castling or en passant stuff in the parent class (I hope),
-            # therefore we won't use the parameter "trial"
+            # try to make the move and generate black's threats, if one of the black's pieces attacks our king, then delete
+            # the move from the list of possible moves
             w_pieces.create_moves_dict("trial")
-            # generate possible moves in current position
-            possible_moves_list = w_pieces.delete_move_if_check("list")
-            print("moves", possible_moves_list)
-            exact_same_eval_counter = 1
-            for move in possible_moves_list:
-                # get evaluation after every possible move
+            nested_list = w_pieces.delete_move_if_check("list")
+            evaluation_dictionary = {}
+            counter_of_same_evals = 1
+            for move in nested_list:
                 w_pieces.move_a_piece(move, "trial")
                 deleted_piece = w_pieces.delete_taken_pieces()
-
+                (print("depth", self.depth, "w_moves", w_pieces.w_lists))
                 # to avoid evaluating the same position again and again
-                # current_position_hash = self.hash_current_position()
-                # if current_position_hash not in self.hash_table:
-                evaluation = self.static_evaluation()
-                #     self.hash_table[current_position_hash] = evaluation
-                # else:
-                #     evaluation = self.hash_table[current_position_hash]
-
-                if evaluation not in evaluation_dictionary:
-                    evaluation_dictionary[evaluation] = move
+                current_position_hash = hash_current_position()
+                if current_position_hash not in self.hash_table:
+                    current_evaluation = self.static_evaluation()
+                    self.hash_table[current_position_hash] = current_evaluation
                 else:
-                    evaluation += exact_same_eval_counter
-                    exact_same_eval_counter += 1
-                    evaluation_dictionary[evaluation] = move
-                print("evaluation", evaluation_dictionary)
-                if self.ply > 0:
-                    self.ply -= 1
-                    black_eval = self.search("black")
+                    current_evaluation = self.hash_table[current_position_hash]
+
+                rounded_eval = 1000 * round(current_evaluation, 2)
+                self.node_count += 1
+
+                if rounded_eval in evaluation_dictionary:
+                    rounded_eval += counter_of_same_evals
+                    counter_of_same_evals += 1
+                evaluation_dictionary[rounded_eval] = move
+
+                if last != "last":
+                    black_eval = self.search("black", "not")
                     try:
                         mini = min(black_eval.keys())
-                        evaluation_dictionary[mini] = evaluation_dictionary.pop(evaluation)
+                        evaluation_dictionary[mini] = evaluation_dictionary.pop(rounded_eval)
                     except ValueError:
                         pass
 
@@ -65,52 +64,57 @@ class Search(WhitePieces, BlackPieces):
                     w_pieces.b_lists[deleted_piece[0]].append(deleted_piece[1])
                 reverse_move = [move[1], move[0]]
                 w_pieces.move_a_piece(reverse_move, "trial")
-
+            # it is not possible to delete an item directly in the process because it would mess up the 'for' loop
+            return evaluation_dictionary
 
         else:
             b_pieces.create_moves_dict("trial")
-            # generate possible moves in current position
-            possible_moves_list = b_pieces.delete_move_if_check("list")
-            print("black", possible_moves_list)
-
-            exact_same_eval_counter = 1
-            for move in possible_moves_list:
-                # get evaluation after every possible move
+            nested_list = b_pieces.delete_move_if_check("list")
+            evaluation_dictionary = {}
+            counter_of_same_evals = 1
+            for move in nested_list:
                 b_pieces.move_a_piece(move, "trial")
                 deleted_piece = b_pieces.delete_taken_pieces()
-
                 # to avoid evaluating the same position again and again
-                # current_position_hash = self.hash_current_position()
-                # if current_position_hash not in self.hash_table:
-                evaluation = self.static_evaluation()
-                #     self.hash_table[current_position_hash] = evaluation
-                # else:
-                #     evaluation = self.hash_table[current_position_hash]
-
-                if evaluation not in evaluation_dictionary:
-                    evaluation_dictionary[evaluation] = move
+                current_position_hash = hash_current_position()
+                if current_position_hash not in self.hash_table:
+                    current_evaluation = self.static_evaluation()
+                    self.hash_table[current_position_hash] = current_evaluation
                 else:
-                    evaluation += exact_same_eval_counter
-                    exact_same_eval_counter += 1
-                    evaluation_dictionary[evaluation] = move
-                print("black evaluation", evaluation_dictionary)
-                if self.ply > 0:
-                    white_eval = self.search("white")
-                    self.ply -= 1
-                    try:
-                        maxi = max(white_eval.keys())
-                        evaluation_dictionary[maxi] = evaluation_dictionary.pop(evaluation)
-                    except ValueError:
-                        pass
+                    print(len(self.hash_table))
+                    current_evaluation = self.hash_table[current_position_hash]
+
+                rounded_eval = 1000 * round(current_evaluation, 2)
+                self.node_count += 1
+                print(self.node_count)
+
+                if rounded_eval in evaluation_dictionary:
+                    rounded_eval += counter_of_same_evals
+                    counter_of_same_evals += 1
+                evaluation_dictionary[rounded_eval] = move
+
+                if self.depth < 100:
+                    self.depth += 1
+                    print("depth", self.depth)
+                    white_eval = self.search("white", "not_last")
+                else:
+                    print("last")
+                    white_eval = self.search("white", "last")
+                try:
+                    mini = max(white_eval.keys())
+                    evaluation_dictionary[mini] = evaluation_dictionary.pop(rounded_eval)
+                except ValueError:
+                    pass
 
                 if deleted_piece:
                     b_pieces.w_lists[deleted_piece[0]].append(deleted_piece[1])
                 reverse_move = [move[1], move[0]]
                 b_pieces.move_a_piece(reverse_move, "trial")
+            # it is not possible to delete an item directly in the process because it would mess up the 'for' loop
+            return evaluation_dictionary
 
-        return evaluation_dictionary
 
-    def hash_current_position(self):
+def hash_current_position():
         list_of_tuples = []
         for i in w_pieces.w_lists:
             list_of_tuples.append(tuple(i))
@@ -130,43 +134,6 @@ def select_random_move(nested_list):
 
 
 
-def white_search(last):
-    # try to make the move and generate black's threats, if one of the black's pieces attacks our king, then delete
-    # the move from the list of possible moves
-    w_pieces.create_moves_dict("trial")
-    moves_dict = w_pieces.delete_move_if_check()
-    nested_list = dictionary_to_nested_list(moves_dict)
-    evaluation_dictionary = {}
-    counter_of_same_evals = 1
-    for move in nested_list:
-        w_pieces.move_a_piece(move, "trial")
-        deleted_piece = w_pieces.delete_taken_pieces()
-
-        current_evaluation = static_evaluation()
-        rounded_eval = 1000 * round(current_evaluation, 2)
-        global node_count
-        node_count += 1
-
-
-        if rounded_eval in evaluation_dictionary:
-            rounded_eval += counter_of_same_evals
-            counter_of_same_evals += 1
-        evaluation_dictionary[rounded_eval] = move
-        if last != "last":
-            black_eval = black_search()
-            try:
-                mini = min(black_eval.keys())
-                evaluation_dictionary[mini] = evaluation_dictionary.pop(rounded_eval)
-            except ValueError:
-                pass
-
-
-        if deleted_piece:
-            w_pieces.b_lists[deleted_piece[0]].append(deleted_piece[1])
-        reverse_move = [move[1], move[0]]
-        w_pieces.move_a_piece(reverse_move, "trial")
-    # it is not possible to delete an item directly in the process because it would mess up the 'for' loop
-    return evaluation_dictionary
 
 
 def choose_the_best_move(eval_dict):
@@ -177,38 +144,6 @@ def choose_the_best_move(eval_dict):
 
 
 
-def black_search():
-    b_pieces.create_moves_dict("trial")
-    moves_dict = b_pieces.delete_move_if_check()
-    nested_list = dictionary_to_nested_list(moves_dict)
-    evaluation_dictionary = {}
-    counter_of_same_evals = 1
-    for move in nested_list:
-        b_pieces.move_a_piece(move, "trial")
-        deleted_piece = b_pieces.delete_taken_pieces()
 
-        current_evaluation = static_evaluation()
-        rounded_eval = 1000 * round(current_evaluation, 2)
-        global node_count
-        node_count += 1
-
-        if rounded_eval in evaluation_dictionary:
-            rounded_eval += counter_of_same_evals
-            counter_of_same_evals += 1
-        evaluation_dictionary[rounded_eval] = move
-
-        # white_eval = white_search("last")
-        # try:
-        #     mini = max(white_eval.keys())
-        #     evaluation_dictionary[mini] = evaluation_dictionary.pop(rounded_eval)
-        # except ValueError:
-        #     pass
-
-        if deleted_piece:
-            b_pieces.w_lists[deleted_piece[0]].append(deleted_piece[1])
-        reverse_move = [move[1], move[0]]
-        b_pieces.move_a_piece(reverse_move, "trial")
-    # it is not possible to delete an item directly in the process because it would mess up the 'for' loop
-    return evaluation_dictionary
 
 
