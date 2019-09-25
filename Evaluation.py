@@ -55,8 +55,11 @@ class Search(WhitePieces, BlackPieces):
                 if self.ply > 0:
                     self.ply -= 1
                     black_eval = self.search("black")
-                    mini = min(black_eval.keys())
-                    evaluation_dictionary[mini] = evaluation_dictionary.pop(evaluation)
+                    try:
+                        mini = min(black_eval.keys())
+                        evaluation_dictionary[mini] = evaluation_dictionary.pop(evaluation)
+                    except ValueError:
+                        pass
 
                 if deleted_piece:
                     w_pieces.b_lists[deleted_piece[0]].append(deleted_piece[1])
@@ -89,12 +92,16 @@ class Search(WhitePieces, BlackPieces):
                 else:
                     evaluation += exact_same_eval_counter
                     exact_same_eval_counter += 1
+                    evaluation_dictionary[evaluation] = move
                 print("black evaluation", evaluation_dictionary)
                 if self.ply > 0:
                     white_eval = self.search("white")
                     self.ply -= 1
-                    maxi = max(white_eval.keys())
-                    evaluation_dictionary[maxi] = evaluation_dictionary.pop(evaluation)
+                    try:
+                        maxi = max(white_eval.keys())
+                        evaluation_dictionary[maxi] = evaluation_dictionary.pop(evaluation)
+                    except ValueError:
+                        pass
 
                 if deleted_piece:
                     b_pieces.w_lists[deleted_piece[0]].append(deleted_piece[1])
