@@ -1,6 +1,6 @@
 import pygame
 from New_Board import *
-from evaluation import Search, choose_the_best_move, select_random_move
+from Evaluation import Search, choose_the_best_move, select_random_move
 
 import time
 
@@ -440,10 +440,10 @@ def move_pieces(side_to_move, surface):
             checkmate = True
 
         pygame.display.update()
-        time.sleep(0)
         nested_list = dictionary_to_nested_list(dictionary_with_moves)
         if not checkmate:
             search.depth = 0
+            search.ply = 0
             if side_to_move == "black":
                 random_move = select_random_move(nested_list)
                 b_pieces.move_a_piece(random_move, "o")
@@ -457,6 +457,7 @@ def move_pieces(side_to_move, surface):
                 # random_move = select_random_move(nested_list)
                 # w_pieces.move_a_piece(random_move, "o")
                 w_pieces.delete_taken_pieces()
+                time.sleep(5)
                 return
 
 interface_main()
