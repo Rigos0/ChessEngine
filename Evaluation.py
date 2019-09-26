@@ -3,6 +3,7 @@ from New_Board import *
 
 global node_count
 
+
 class Search(WhitePieces, BlackPieces):
     def __init__(self):
         WhitePieces.__init__(self)
@@ -10,6 +11,9 @@ class Search(WhitePieces, BlackPieces):
         self.hash_table = {}
         self.depth = 0
         self.node_count = 0
+        self.ply = 0
+        self.ply_depth = 1
+        self.tree_node = 0
 
     def static_evaluation(self):
         w_material = len(w_pieces.w_pawns) + len(w_pieces.w_queen) * 9 + len(w_pieces.w_rooks) * 5 \
@@ -17,8 +21,10 @@ class Search(WhitePieces, BlackPieces):
         b_material = len(b_pieces.b_pawns) + len(b_pieces.b_queen) * 9 + len(b_pieces.b_rooks) * 5 \
                      + len(b_pieces.b_bishops) * 3.16 + len(b_pieces.b_knights) * 3.16 + len(b_pieces.b_king) * 200
 
-        # w_mobility = len(possible_moves) * 0.1
-        static_evaluation = w_material - b_material  #w_mobility
+        w_pieces.create_moves_dict("trial")
+        nested_list = w_pieces.delete_move_if_check("list")
+        w_mobility = len(nested_list) * 0.1
+        static_evaluation = w_material - b_material + w_mobility
 
         rounded = 1 + 100 * round(static_evaluation, 2)
 
@@ -32,10 +38,11 @@ class Search(WhitePieces, BlackPieces):
             nested_list = w_pieces.delete_move_if_check("list")
             evaluation_dictionary = {}
             counter_of_same_evals = 1
+            self.ply += 1
             for move in nested_list:
+                self.tree_node += 1
                 w_pieces.move_a_piece(move, "trial")
                 deleted_piece = w_pieces.delete_taken_pieces()
-                (print("depth", self.depth, "w_moves", w_pieces.w_lists))
                 # to avoid evaluating the same position again and again
                 current_position_hash = hash_current_position()
                 if current_position_hash not in self.hash_table:
@@ -50,15 +57,28 @@ class Search(WhitePieces, BlackPieces):
                 if rounded_eval in evaluation_dictionary:
                     rounded_eval += counter_of_same_evals
                     counter_of_same_evals += 1
-                evaluation_dictionary[rounded_eval] = move
+                    evaluation_dictionary[rounded_eval] = move
+                else:
+                    evaluation_dictionary[rounded_eval] = move
 
-                if last != "last":
+                if self.ply < self.ply_depth:
+
                     black_eval = self.search("black", "not")
-                    try:
-                        mini = min(black_eval.keys())
-                        evaluation_dictionary[mini] = evaluation_dictionary.pop(rounded_eval)
-                    except ValueError:
-                        pass
+                else:
+                    black_eval = self.search("black", "last")
+
+                # try:
+                #     mini = min(black_eval.keys())
+                #     evaluation_dictionary[mini] = evaluation_dictionary.pop(rounded_eval)
+                #
+                # except ValueError:
+                #     pass
+
+                tree = {self.tree_node: evaluation_dictionary,
+                           self.tree_node: black_eval}
+                print(tree)
+
+
 
                 if deleted_piece:
                     w_pieces.b_lists[deleted_piece[0]].append(deleted_piece[1])
@@ -81,30 +101,30 @@ class Search(WhitePieces, BlackPieces):
                     current_evaluation = self.static_evaluation()
                     self.hash_table[current_position_hash] = current_evaluation
                 else:
-                    print(len(self.hash_table))
                     current_evaluation = self.hash_table[current_position_hash]
 
                 rounded_eval = 1000 * round(current_evaluation, 2)
                 self.node_count += 1
-                print(self.node_count)
+                #print(self.node_count)
 
                 if rounded_eval in evaluation_dictionary:
                     rounded_eval += counter_of_same_evals
                     counter_of_same_evals += 1
-                evaluation_dictionary[rounded_eval] = move
-
-                if self.depth < 100:
-                    self.depth += 1
-                    print("depth", self.depth)
-                    white_eval = self.search("white", "not_last")
+                    evaluation_dictionary[rounded_eval] = move
                 else:
-                    print("last")
-                    white_eval = self.search("white", "last")
-                try:
-                    mini = max(white_eval.keys())
-                    evaluation_dictionary[mini] = evaluation_dictionary.pop(rounded_eval)
-                except ValueError:
+                    evaluation_dictionary[rounded_eval] = move
+
+                if last != "last":
+                    white_eval = self.search("white", "not_last")
+                    try:
+                        mini = max(white_eval.keys())
+                        evaluation_dictionary[mini] = evaluation_dictionary.pop(rounded_eval)
+                    except ValueError:
+                        pass
+                else:
                     pass
+
+
 
                 if deleted_piece:
                     b_pieces.w_lists[deleted_piece[0]].append(deleted_piece[1])
@@ -130,9 +150,6 @@ def hash_current_position():
 def select_random_move(nested_list):
     random_number = random.randint(0, len(nested_list) -1)
     return nested_list[random_number]
-
-
-
 
 
 
