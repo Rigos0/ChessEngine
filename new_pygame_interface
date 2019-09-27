@@ -450,14 +450,14 @@ def move_pieces(side_to_move, surface):
                 b_pieces.delete_taken_pieces()
                 return
             else:
-                eval_dictionary = search.search("white", "not")
+                eval_dictionary = search.search("white", "not", 0)
                 the_best_move = choose_the_best_move(eval_dictionary)
                 w_pieces.move_a_piece(the_best_move, "o")
 
                 # random_move = select_random_move(nested_list)
                 # w_pieces.move_a_piece(random_move, "o")
                 w_pieces.delete_taken_pieces()
-                time.sleep(5)
+                time.sleep(0)
                 return
 
 interface_main()
