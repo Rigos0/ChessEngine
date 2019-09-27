@@ -12,8 +12,10 @@ class Search(WhitePieces, BlackPieces):
         self.depth = 0
         self.node_count = 0
         self.ply = 0
-        self.ply_depth = 1
+        self.ply_depth = 2
         self.tree_node = 0
+        self.tree = {}
+        self.relational_tree = {}
 
     def static_evaluation(self):
         w_material = len(w_pieces.w_pawns) + len(w_pieces.w_queen) * 9 + len(w_pieces.w_rooks) * 5 \
@@ -30,13 +32,13 @@ class Search(WhitePieces, BlackPieces):
 
         return rounded
 
-    def search(self, side_to_move, last):
+    def search(self, side_to_move, last, parent_node):
+        self.tree_node = parent_node
         if side_to_move == "white":
             # try to make the move and generate black's threats, if one of the black's pieces attacks our king, then delete
             # the move from the list of possible moves
             w_pieces.create_moves_dict("trial")
             nested_list = w_pieces.delete_move_if_check("list")
-            evaluation_dictionary = {}
             counter_of_same_evals = 1
             self.ply += 1
             for move in nested_list:
@@ -54,45 +56,47 @@ class Search(WhitePieces, BlackPieces):
                 rounded_eval = 1000 * round(current_evaluation, 2)
                 self.node_count += 1
 
-                if rounded_eval in evaluation_dictionary:
+                if rounded_eval in self.tree:
                     rounded_eval += counter_of_same_evals
                     counter_of_same_evals += 1
-                    evaluation_dictionary[rounded_eval] = move
+                    eval_move = {rounded_eval: move}
+                    self.tree[self.tree_node] = eval_move
                 else:
-                    evaluation_dictionary[rounded_eval] = move
+                    eval_move = {rounded_eval: move}
+                    self.tree[self.tree_node] = eval_move
 
-                if self.ply < self.ply_depth:
+                print(self.tree)
+                self.relational_tree[self.tree_node] = parent_node
+                print(self.relational_tree)
 
-                    black_eval = self.search("black", "not")
-                else:
-                    black_eval = self.search("black", "last")
+                # if self.ply < self.ply_depth:
+                #     black_eval = self.search("black", "not", self.tree_node)
+                # else:
+                (print("self.tree_node", self.tree_node))
+                black_eval = self.search("black", "last", self.tree_node)
 
                 # try:
                 #     mini = min(black_eval.keys())
-                #     evaluation_dictionary[mini] = evaluation_dictionary.pop(rounded_eval)
+                #     self.tree[mini] = self.tree.pop(rounded_eval)
                 #
                 # except ValueError:
                 #     pass
 
-                tree = {self.tree_node: evaluation_dictionary,
-                           self.tree_node: black_eval}
-                print(tree)
-
-
-
+                # it is not possible to delete an item directly in the process because it would mess up the 'for' loop
                 if deleted_piece:
                     w_pieces.b_lists[deleted_piece[0]].append(deleted_piece[1])
                 reverse_move = [move[1], move[0]]
                 w_pieces.move_a_piece(reverse_move, "trial")
-            # it is not possible to delete an item directly in the process because it would mess up the 'for' loop
-            return evaluation_dictionary
+
+            return self.tree
 
         else:
+            print("BLACK")
             b_pieces.create_moves_dict("trial")
             nested_list = b_pieces.delete_move_if_check("list")
-            evaluation_dictionary = {}
             counter_of_same_evals = 1
             for move in nested_list:
+                self.tree_node += 1
                 b_pieces.move_a_piece(move, "trial")
                 deleted_piece = b_pieces.delete_taken_pieces()
                 # to avoid evaluating the same position again and again
@@ -107,31 +111,39 @@ class Search(WhitePieces, BlackPieces):
                 self.node_count += 1
                 #print(self.node_count)
 
-                if rounded_eval in evaluation_dictionary:
+                if rounded_eval in self.tree:
                     rounded_eval += counter_of_same_evals
                     counter_of_same_evals += 1
-                    evaluation_dictionary[rounded_eval] = move
+                    eval_move = {rounded_eval: move}
+                    self.tree[self.tree_node] = eval_move
                 else:
-                    evaluation_dictionary[rounded_eval] = move
+                    eval_move = {rounded_eval: move}
+                    self.tree[self.tree_node] = eval_move
+
+
+                self.relational_tree[self.tree_node] = parent_node
+                print("black relational tree", self.relational_tree)
 
                 if last != "last":
-                    white_eval = self.search("white", "not_last")
+                    white_eval = self.search("white", "not_last", self.tree_node)
                     try:
                         mini = max(white_eval.keys())
-                        evaluation_dictionary[mini] = evaluation_dictionary.pop(rounded_eval)
+                        self.tree[mini] = self.tree.pop(rounded_eval)
                     except ValueError:
                         pass
                 else:
                     pass
-
-
 
                 if deleted_piece:
                     b_pieces.w_lists[deleted_piece[0]].append(deleted_piece[1])
                 reverse_move = [move[1], move[0]]
                 b_pieces.move_a_piece(reverse_move, "trial")
             # it is not possible to delete an item directly in the process because it would mess up the 'for' loop
-            return evaluation_dictionary
+        return self.tree
+
+
+    def reset_search(self):
+        self.tree = {}
 
 
 def hash_current_position():
@@ -140,9 +152,6 @@ def hash_current_position():
             list_of_tuples.append(tuple(i))
         converted = tuple(list_of_tuples)
         return hash(converted)
-
-
-
 
 
 
