@@ -1,7 +1,5 @@
 import random
-import timeit
 from New_Board import *
-
 global node_count
 
 
@@ -155,14 +153,17 @@ class Search(WhitePieces, BlackPieces):
         for move in nested_list:
             w_pieces.move_a_piece(move, "trial")
             deleted_piece = w_pieces.delete_taken_pieces()
-
-            opponents_best_move = self.black_minimize("not_last")
+            current_hash = hash_current_position()
+            if current_hash not in self.hash_table:
+                opponents_best_eval = self.black_minimize("not_last")
+            else:
+                 opponents_best_eval = self.hash_table[current_hash]
             self.node_count += 1
             print(self.node_count)
-            if not opponents_best_move:
+            if not opponents_best_eval:
                 return move
 
-            eval_list.append(opponents_best_move)
+            eval_list.append(opponents_best_eval)
             if deleted_piece:
                 w_pieces.b_lists[deleted_piece[0]].append(deleted_piece[1])
             reverse_move = [move[1], move[0]]
@@ -178,16 +179,21 @@ class Search(WhitePieces, BlackPieces):
         for move in nested_list:
             w_pieces.move_a_piece(move, "trial")
             deleted_piece = w_pieces.delete_taken_pieces()
-
-            if self.depth >= self.max_depth:
-                opponents_best_move = self.black_minimize("last")
+            current_hash = hash_current_position()
+            if current_hash not in self.hash_table:
+                if self.depth >= self.max_depth:
+                    opponents_best_eval = self.black_minimize("last")
+                else:
+                    opponents_best_eval = self.black_minimize("not_last")
+                    self.hash_table[current_hash] = opponents_best_eval
             else:
-                opponents_best_move = self.black_minimize("not_last")
+                 opponents_best_eval = self.hash_table[current_hash]
+
 
             self.node_count += 1
             print(self.node_count)
 
-            eval_list.append(opponents_best_move)
+            eval_list.append(opponents_best_eval)
             if deleted_piece:
                 w_pieces.b_lists[deleted_piece[0]].append(deleted_piece[1])
             reverse_move = [move[1], move[0]]
@@ -203,10 +209,16 @@ class Search(WhitePieces, BlackPieces):
         for move in nested_list:
             b_pieces.move_a_piece(move, "trial")
             deleted_piece = b_pieces.delete_taken_pieces()
-            if last == "last":
-                evaluation = self.static_evaluation()
+            current_hash = hash_current_position()
+            if current_hash not in self.hash_table:
+                if last == "last":
+                    evaluation = self.static_evaluation()
+                else:
+                    evaluation = self.white_maximize("not_last")
+                self.hash_table[current_hash] = evaluation
             else:
-                evaluation = self.white_maximize("not_last")
+                evaluation = self.hash_table[current_hash]
+
             self.node_count += 1
             eval_list.append(evaluation)
             if deleted_piece:
@@ -225,16 +237,15 @@ def hash_current_position():
         list_of_tuples = []
         for i in w_pieces.w_lists:
             list_of_tuples.append(tuple(i))
+        for x in b_pieces.b_lists:
+            list_of_tuples.append(tuple(x))
         converted = tuple(list_of_tuples)
         return hash(converted)
-
-
 
 
 def select_random_move(nested_list):
     random_number = random.randint(0, len(nested_list) -1)
     return nested_list[random_number]
-
 
 
 def choose_the_best_move(eval_dict):
