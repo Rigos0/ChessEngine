@@ -1,0 +1,6 @@
+venv
+wandb
+old_files
+NN_models
+datasets
+.vs
