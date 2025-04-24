@@ -7,7 +7,7 @@ from keras.models import load_model
 keras.backend.set_learning_phase(0)
 
 # load the neural network keras model
-model = load_model('evaluation_regression2')
+model = load_model('model_files/evaluation_regression2')
 
 
 # a single Node in the tree
@@ -479,8 +479,8 @@ class Monte_Carlo_Search():
     def __init__(self):
         # loops to finish
         self.depth = 20
-        self.policy_network = load_model("evaluation_regression2")
-        self.value_network = load_model("classification1_win_draw_loss_1")
+        self.policy_network = load_model("model_files/evaluation_regression2")
+        self.value_network = load_model("model_files/classification1_win_draw_loss_1")
 
     def selection(self, parent_node_index):
         children_indices = tree.get_children(parent_node_index)
