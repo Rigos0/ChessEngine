@@ -4,3 +4,6 @@ old_files
 NN_models
 datasets
 .vs
+
+.idea
+__pycache__
