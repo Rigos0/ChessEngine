@@ -1,0 +1,241 @@
+from keras.datasets import cifar10
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+from keras.utils import to_categorical
+
+# Load data
+
+board = np.load('board_vectors.npy')
+X_train = board[:300_000]
+eval = np.load('evaluation.npy')
+y_train = eval[:300_000]
+
+# there are different numbers of positions in each
+# category, therefore we want to normalize the number of samples in each
+# calculate number of samples in each classes (in this case it will be 14326)
+# categories = [1,2,3,4,5,6,7,8,9,10,11]
+# categories_counter = [0,0,0,0,0,0,0,0,0,0,0]
+# print(X_train.shape)
+# y_train = np.ndarray.tolist(y_train)
+# positions_to_delete = []
+# index_counter = 0
+# for label in y_train:
+#     index = categories.index(label)
+#     categories_counter[index] += 1
+#     print(categories_counter)
+#     if categories_counter[index] > 14_326:
+#         positions_to_delete.append(index_counter)
+#     index_counter += 1
+
+# normalize the number of samples in X_train
+# X_train = np.ndarray.tolist(X_train)
+# for index in sorted(positions_to_delete, reverse=True):
+#     del X_train[index]
+# X_train = np.asarray(X_train)
+# print(X_train.shape)
+# # normalize the number of samples in y_train
+# for index in sorted(positions_to_delete, reverse=True):
+#     del y_train[index]
+# y_train = np.asarray(y_train)
+
+#normalize labels so the model can understand the data
+num_category = 11
+# y_train = to_categorical(y_train)
+input_shape = (8,8,6)
+
+# shuffle the data
+s = np.arange(X_train.shape[0])
+np.random.shuffle(s)
+X_train = X_train[s]
+y_train = y_train[s]
+
+# convert labels to human evaluation
+y_train = np.ndarray.tolist(y_train)
+categories = [1,2,3,4,5,6,7,8,9,10,11]
+new_y_train = []
+evals = [-5,-3,-2, -1, -0.5, 0 , 0.5, 1,2,3,5]
+for y in y_train:
+    index = categories.index(y)
+    new_y_train.append(evals[index])
+y_train = new_y_train
+y_train = np.asarray(y_train)
+
+
+
+from keras import Sequential
+from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
+from keras.callbacks import EarlyStopping
+from keras.losses import categorical_crossentropy
+from keras.optimizers import SGD
+from keras.activations import elu
+
+
+model = Sequential()
+# convolutional layer with rectified linear unit activation
+model.add(Conv2D(30, kernel_size=(5, 5),  activation='relu', input_shape=(8,8,6)))
+model.add(Conv2D(50, (3, 3), activation='relu'))
+model.add(Dropout(0.4))
+model.add(Flatten())
+model.add(Dense(258, activation="relu"))
+model.add(Dense(258, activation="relu"))
+model.add(Dropout(0.5))
+model.add(Dense(1, activation='relu'))
+sgd = SGD(lr=0.01, decay=1e-8)
+model.compile(loss="mean_squared_error",
+              optimizer='adam')
+              #metrics=['accuracy'])
+
+# fit model
+history = model.fit(X_train, y_train, epochs=100, batch_size=64, verbose=1, validation_split=0.1,
+         callbacks=[EarlyStopping(monitor='val_loss', patience=int(5))])
+
+
+model.save('evaluation_model_one')
+# plt.plot(history.history['acc'])
+# plt.plot(history.history['val_acc'])
+# plt.title('model accuracy')
+# plt.ylabel('accuracy')
+# plt.xlabel('epoch')
+# plt.legend(['train', 'test'], loc='upper left')
+
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('model loss')
+plt.ylabel('loss')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc ='upper_left')
+plt.show()
+# summarize history for loss
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# import pandas as pd
+# from keras import utils
+#
+# train_df = pd.read_csv("scratch_test_list.txt")
+# train_X = train_df.drop(columns ="evaluation")
+#
+# #train_X = utils.normalize(train_X, axis=1)
+#
+# train_X = train_X[:50000]
+# print(train_X)
+# print("type", type(train_X))
+#
+#
+# train_y = train_df[["evaluation"]]
+# train_y = utils.normalize(train_y, axis=1)
+# train_y = train_y[:50000]
+#
+# from sklearn import utils
+# # utils.shuffle((train_X, train_y))
+#
+#
+# from keras import Sequential
+# from keras.layers import Dense, Dropout, Conv2D
+# from keras import activations
+#
+# model = Sequential()
+#
+# n_cols = train_X.shape[1]
+#
+# model.add(Conv2D(768, activation="relu", input_shape= (n_cols,)))
+# model.add(Dropout(0.5))
+# model.add(Dense(64, activation="relu"))
+# model.add(Dropout(0.5))
+# model.add(Dense(1))
+#
+#
+# model.compile(loss="mean_squared_error", optimizer="adam")
+#
+#
+#
+# from keras.callbacks import EarlyStopping
+#
+# early_stopping_monitor = EarlyStopping(patience=3)
+# model.fit(train_X, train_y, validation_split=0.5, epochs=200, callbacks=[early_stopping_monitor])
+#
+# model.save("Supervised_evaluation_SF")
+#
+# test_X = pd.read_csv("buffer_file.txt")
+# test_y_predictions = model.predict(test_X)
+# print(test_y_predictions)
