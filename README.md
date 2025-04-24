@@ -1,5 +1,5 @@
 # Hybrid Chess Engine 
-My 2019 NEA project: a hybrid chess engine using a CNN for evaluation and algorithmic search. Inspired by AlphaZero and Lc0. 
+My 2019 NEA project: a hybrid chess engine using CNNs as policy and value functions. Trained on Stockfish evaluations from lichess anti-cheat system. Inspired by AlphaZero and Lc0. Three search algorithms implemented - custom **MCTS**, **minimax** and custom '**U-search**' algorithm. 
 
 ![image](https://github.com/user-attachments/assets/9ef4b5f8-e941-413b-a786-14552c5e4e01)
 
