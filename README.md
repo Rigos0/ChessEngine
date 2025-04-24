@@ -9,7 +9,7 @@ My 2019 NEA project: a hybrid chess engine using CNNs as policy and value functi
 
 1.  **Create virtual environment:** `uv venv`
 2.  **Activate virtual environment:** `source .venv/bin/activate` (Linux/macOS) or `.venv\Scripts\activate` (Windows)
-3.  **Install dependencies:** `uv sync`
+3.  **Install dependencies:** `uv pip install -r pyproject.toml`
 
 **Run:**
 
